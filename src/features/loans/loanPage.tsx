@@ -23,7 +23,7 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
       <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${color}20` }}>
         <span style={{ color }}>{icon}</span>
       </div>
-      <p style={{ fontFamily: "'Syne', sans-serif", color }} className="text-2xl font-extrabold leading-none mb-1">{value}</p>
+      <p style={{ fontFamily: "'Syne', sans-serif", color }} className="text-lg md:text-2xl font-extrabold leading-none mb-1 truncate">{value}</p>
       <p className="text-[#EEEEEE]/40 text-xs font-medium">{label}</p>
     </div>
   )

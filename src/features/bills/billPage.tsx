@@ -18,11 +18,11 @@ const tabs = [
 
 function StatCard({ label, value, color, icon }: { label: string; value: string; color: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-2xl p-4" style={{ background: `linear-gradient(145deg, ${color}18 0%, rgba(57,62,70,0.5) 100%)`, border: `1px solid ${color}25` }}>
+    <div className="rounded-2xl p-4 overflow-hidden" style={{ background: `linear-gradient(145deg, ${color}18 0%, rgba(57,62,70,0.5) 100%)`, border: `1px solid ${color}25` }}>
       <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${color}20` }}>
         <span style={{ color }}>{icon}</span>
       </div>
-      <p style={{ fontFamily: "'Syne', sans-serif", color }} className="text-2xl font-extrabold leading-none mb-1">{value}</p>
+      <p style={{ fontFamily: "'Syne', sans-serif", color }} className="text-lg md:text-2xl font-extrabold leading-none mb-1 truncate">{value}</p>
       <p className="text-[#EEEEEE]/40 text-xs font-medium">{label}</p>
     </div>
   )
@@ -47,10 +47,12 @@ export function BillPage() {
       <Navbar title="Bill Tracker" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Bill</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Stay on top of what's due.</p>
 
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
         <StatCard label="Pending" value={String(pendingBills.length)} color="#f59e0b" icon={<AlertCircle size={16} />} />
         <StatCard label="Amount due" value={formatCurrency(totalPending)} color="#f87171" icon={<Receipt size={16} />} />
-        <StatCard label="Paid" value={String(paidCount)} color="#4ade80" icon={<CheckCircle2 size={16} />} />
+        <div className="col-span-2 md:col-span-1">
+          <StatCard label="Paid" value={String(paidCount)} color="#4ade80" icon={<CheckCircle2 size={16} />} />
+        </div>
       </div>
 
       <div className="mb-4">
