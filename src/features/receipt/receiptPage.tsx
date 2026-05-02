@@ -6,13 +6,16 @@ import { Button } from '../../components/layout/button'
 import { Modal } from '../../components/layout/modal'
 import { EmptyState } from '../../components/layout/emptyState'
 import { ReceiptForm } from './receiptForm'
+import { ReceiptDetail } from './receiptDetail'
 import { useReceipts } from '../../hooks/useReceipt'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
+import { type Receipt } from '../../types/receipt'
 
 export function ReceiptPage() {
   const { receipts, addReceipt, deleteReceipt } = useReceipts()
   const [showModal, setShowModal] = useState(false)
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
 
   return (
     <PageContainer>
@@ -30,8 +33,9 @@ export function ReceiptPage() {
             return (
               <div
                 key={receipt.id}
-                className="rounded-2xl overflow-hidden"
+                className="rounded-2xl overflow-hidden cursor-pointer"
                 style={{ background: 'rgba(57,62,70,0.55)', border: '1px solid rgba(238,238,238,0.06)' }}
+                onClick={() => setSelectedReceipt(receipt)}
               >
                 <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #ec4899, transparent)' }} />
                 <div className="p-4 flex items-center justify-between gap-3">
@@ -54,7 +58,7 @@ export function ReceiptPage() {
                         <Users size={9} /> {formatCurrency(perPerson)} each
                       </p>
                     </div>
-                    <Button size="sm" variant="danger" onClick={() => deleteReceipt(receipt.id)}>
+                    <Button size="sm" variant="danger" onClick={(e) => { e.stopPropagation(); deleteReceipt(receipt.id) }}>
                       <Trash2 size={13} />
                     </Button>
                   </div>
@@ -67,6 +71,10 @@ export function ReceiptPage() {
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Split Receipt">
         <ReceiptForm onSave={(data) => { addReceipt(data); setShowModal(false) }} onCancel={() => setShowModal(false)} />
+      </Modal>
+
+      <Modal isOpen={!!selectedReceipt} onClose={() => setSelectedReceipt(null)} title={selectedReceipt?.title ?? ''}>
+        {selectedReceipt && <ReceiptDetail receipt={selectedReceipt} />}
       </Modal>
     </PageContainer>
   )
