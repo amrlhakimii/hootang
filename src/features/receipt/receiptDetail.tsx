@@ -1,6 +1,9 @@
+import { FileDown } from 'lucide-react'
 import { type Receipt } from '../../types/receipt'
 import { calculateReceiptSplit } from '../../utils/calculateSplit'
 import { formatCurrency } from '../../utils/formatCurrency'
+import { generateReceiptPDF } from '../../utils/generateReceiptPDF'
+import { Button } from '../../components/layout/button'
 
 interface ReceiptDetailProps {
   receipt: Receipt
@@ -15,6 +18,11 @@ export function ReceiptDetail({ receipt }: ReceiptDetailProps) {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="secondary" size="sm" onClick={() => generateReceiptPDF(receipt)}>
+          <FileDown size={14} /> Save PDF
+        </Button>
+      </div>
       {/* Items */}
       <div>
         <p className="text-[#EEEEEE]/50 text-xs font-medium uppercase tracking-wider mb-2">Items</p>
