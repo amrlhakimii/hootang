@@ -46,6 +46,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
     <div
       className="fixed inset-0 z-[200] flex items-end md:items-center justify-center md:p-4"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       onClick={onClose}
     >
       <div ref={backdropRef} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -57,12 +58,13 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           borderTop: '1px solid rgba(0,173,181,0.2)',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '88dvh',
+          // leave room for Dynamic Island at top + home indicator already handled by container padding
+          maxHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px)',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header — fixed, never scrolls */}
+        {/* Header */}
         <div
           className="flex items-center justify-between shrink-0"
           style={{ padding: '20px', borderBottom: '1px solid #222831' }}
@@ -84,7 +86,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             padding: '20px',
-            paddingBottom: 'calc(env(safe-area-inset-bottom) + 28px)',
+            paddingBottom: '32px',
           }}
         >
           {children}
