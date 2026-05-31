@@ -1,9 +1,9 @@
 import { type Subscription } from '../types/subscription'
-import { useLocalStorage } from './useLocalStorage'
+import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useSubscriptions() {
-  const [subscriptions, setSubscriptions] = useLocalStorage<Subscription[]>('hootang_subs', [])
+  const [subscriptions, setSubscriptions] = useFirestoreCollection<Subscription>('hootang_subs', 'subscriptions')
 
   const addSubscription = (data: Omit<Subscription, 'id'>) => {
     const sub: Subscription = { ...data, id: generateID() }

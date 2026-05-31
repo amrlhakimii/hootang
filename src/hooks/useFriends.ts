@@ -1,9 +1,9 @@
 import { type Friend } from '../types/friend'
-import { useLocalStorage } from './useLocalStorage'
+import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useFriends() {
-  const [friends, setFriends] = useLocalStorage<Friend[]>('hootang_friends', [])
+  const [friends, setFriends] = useFirestoreCollection<Friend>('hootang_friends', 'friends')
 
   const addFriend = (name: string, notes: string) => {
     const friend: Friend = { id: generateID(), name: name.trim(), notes }

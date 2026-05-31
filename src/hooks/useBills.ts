@@ -1,9 +1,9 @@
 import { type Bill, type BillStatus } from '../types/bill'
-import { useLocalStorage } from './useLocalStorage'
+import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useBills() {
-  const [bills, setBills] = useLocalStorage<Bill[]>('hootang_bills', [])
+  const [bills, setBills] = useFirestoreCollection<Bill>('hootang_bills', 'bills')
 
   const addBill = (data: Omit<Bill, 'id' | 'status'>) => {
     const bill: Bill = { ...data, id: generateID(), status: 'pending' }

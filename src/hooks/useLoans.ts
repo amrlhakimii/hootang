@@ -1,9 +1,9 @@
 import { type Loan, type LoanStatus } from '../types/loan'
-import { useLocalStorage } from './useLocalStorage'
+import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useLoans() {
-  const [loans, setLoans] = useLocalStorage<Loan[]>('hootang_loans', [])
+  const [loans, setLoans] = useFirestoreCollection<Loan>('hootang_loans', 'loans')
 
   const addLoan = (data: Omit<Loan, 'id' | 'status'>) => {
     const loan: Loan = { ...data, id: generateID(), status: 'pending' }

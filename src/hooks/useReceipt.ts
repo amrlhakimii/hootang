@@ -1,9 +1,9 @@
 import { type Receipt } from '../types/receipt'
-import { useLocalStorage } from './useLocalStorage'
+import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useReceipts() {
-  const [receipts, setReceipts] = useLocalStorage<Receipt[]>('hootang_receipts', [])
+  const [receipts, setReceipts] = useFirestoreCollection<Receipt>('hootang_receipts', 'receipts')
 
   const addReceipt = (data: Omit<Receipt, 'id'>) => {
     const receipt: Receipt = { ...data, id: generateID() }
