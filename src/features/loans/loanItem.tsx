@@ -1,8 +1,9 @@
-import { CheckCircle, Trash2, Clock } from 'lucide-react'
+import { CheckCircle, Trash2, Clock, Share2 } from 'lucide-react'
 import { type Loan } from '../../types/loan'
 import { Button } from '../../components/layout/button'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
+import { shareWhatsApp } from '../../utils/shareWhatsApp'
 import confetti from 'canvas-confetti'
 
 interface LoanItemProps {
@@ -14,6 +15,25 @@ interface LoanItemProps {
 export function LoanItem({ loan, onSettle, onDelete }: LoanItemProps) {
   const isLent = loan.type === 'lent'
   const accentColor = loan.status === 'settled' ? '#6b7280' : isLent ? '#4ade80' : '#f87171'
+
+  const handleShare = () => {
+    const lines = loan.type === 'lent'
+      ? [
+          `Hey ${loan.person}! 👋`,
+          `Just a reminder — you owe me *${formatCurrency(loan.amount)}*${loan.notes ? ` for "${loan.notes}"` : ''}.`,
+          loan.dueDate ? `Due by ${formatDate(loan.dueDate)}.` : '',
+          '',
+          '_Tracked via hootang_',
+        ]
+      : [
+          `Hey! 👋`,
+          `Reminder that I owe *${loan.person}* *${formatCurrency(loan.amount)}*${loan.notes ? ` for "${loan.notes}"` : ''}.`,
+          loan.dueDate ? `Due by ${formatDate(loan.dueDate)}.` : '',
+          '',
+          '_Tracked via hootang_',
+        ]
+    shareWhatsApp(lines.filter(Boolean).join('\n'))
+  }
 
   const handleSettle = () => {
     onSettle(loan.id)
@@ -47,6 +67,9 @@ export function LoanItem({ loan, onSettle, onDelete }: LoanItemProps) {
           {isLent ? '+' : '-'}{formatCurrency(loan.amount)}
         </p>
         <div className="flex gap-1">
+          <Button size="sm" variant="secondary" onClick={handleShare} title="Share on WhatsApp">
+            <Share2 size={13} />
+          </Button>
           {loan.status === 'pending' && (
             <Button size="sm" variant="secondary" onClick={handleSettle} title="Mark settled">
               <CheckCircle size={13} />

@@ -1,8 +1,9 @@
-import { FileDown } from 'lucide-react'
+import { FileDown, Share2 } from 'lucide-react'
 import { type Receipt } from '../../types/receipt'
 import { calculateReceiptSplit } from '../../utils/calculateSplit'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { generateReceiptPDF } from '../../utils/generateReceiptPDF'
+import { shareWhatsApp } from '../../utils/shareWhatsApp'
 import { Button } from '../../components/layout/button'
 
 interface ReceiptDetailProps {
@@ -16,9 +17,30 @@ export function ReceiptDetail({ receipt }: ReceiptDetailProps) {
   const serviceAmt = subtotal * (receipt.serviceCharge / 100)
   const grandTotal = subtotal + taxAmt + serviceAmt
 
+  const handleShare = () => {
+    const subtotal = receipt.items.reduce((sum, i) => sum + i.price, 0)
+    const taxAmt = subtotal * (receipt.tax / 100)
+    const serviceAmt = subtotal * (receipt.serviceCharge / 100)
+    const grandTotal = subtotal + taxAmt + serviceAmt
+
+    const lines = [
+      `🧾 *${receipt.title}*`,
+      `Total: *${formatCurrency(grandTotal)}*`,
+      '',
+      `Here's the breakdown:`,
+      ...shares.map((s) => `• ${s.name} — *${formatCurrency(s.total)}*`),
+      '',
+      '_Shared via hootang_',
+    ]
+    shareWhatsApp(lines.join('\n'))
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button variant="secondary" size="sm" onClick={handleShare}>
+          <Share2 size={14} /> Share
+        </Button>
         <Button variant="secondary" size="sm" onClick={() => generateReceiptPDF(receipt)}>
           <FileDown size={14} /> Save PDF
         </Button>
