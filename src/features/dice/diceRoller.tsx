@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
 import { useDice } from '../../hooks/useDice'
 import { Button } from '../../components/layout/button'
 
@@ -9,20 +11,54 @@ interface DiceRollerProps {
 
 export function DiceRoller({ names }: DiceRollerProps) {
   const { rolling, result, diceValue, roll } = useDice(names)
+  const diceRef = useRef<HTMLDivElement>(null)
+  const resultRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!diceRef.current) return
+    if (rolling) {
+      gsap.killTweensOf(diceRef.current)
+      gsap.to(diceRef.current, {
+        rotation: '+=360',
+        scale: 1.15,
+        duration: 0.22,
+        ease: 'none',
+        repeat: -1,
+      })
+    } else {
+      gsap.killTweensOf(diceRef.current)
+      if (diceValue) {
+        gsap.fromTo(diceRef.current,
+          { scale: 1.4, rotation: -20 },
+          { scale: 1, rotation: 0, duration: 0.55, ease: 'back.out(2)', clearProps: 'all' }
+        )
+      } else {
+        gsap.set(diceRef.current, { clearProps: 'all' })
+      }
+    }
+  }, [rolling, diceValue])
+
+  useEffect(() => {
+    if (!rolling && result && resultRef.current) {
+      gsap.fromTo(resultRef.current,
+        { opacity: 0, y: 18, scale: 0.85 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.7)' }
+      )
+    }
+  }, [rolling, result])
 
   return (
     <div className="flex flex-col items-center gap-5 py-6">
-      {/* Dice */}
       <div
-        className={`text-8xl select-none transition-all duration-100 ${rolling ? 'scale-110' : 'scale-100'}`}
+        ref={diceRef}
+        className="text-8xl select-none"
         style={{ filter: diceValue ? 'drop-shadow(0 0 24px #00ADB5)' : 'none' }}
       >
         {diceValue ? diceFaces[diceValue] : '🎲'}
       </div>
 
-      {/* Result */}
       {result && !rolling && (
-        <div className="text-center px-6 py-4 rounded-2xl w-full" style={{ background: 'rgba(0,173,181,0.1)', border: '1px solid rgba(0,173,181,0.2)' }}>
+        <div ref={resultRef} className="text-center px-6 py-4 rounded-2xl w-full" style={{ background: 'rgba(0,173,181,0.1)', border: '1px solid rgba(0,173,181,0.2)' }}>
           <p className="text-[#EEEEEE]/40 text-xs uppercase tracking-widest mb-1">The universe decided</p>
           <p style={{ fontFamily: "'Syne', sans-serif" }} className="text-[#00ADB5] text-3xl font-extrabold">{result}</p>
           <p className="text-[#EEEEEE]/30 text-sm mt-1">pays the bill 💸</p>

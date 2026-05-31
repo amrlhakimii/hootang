@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Tabs } from '../../components/layout/tabs'
@@ -31,6 +32,17 @@ export function HistoryPage() {
   const [activeTab, setActiveTab] = useState('all')
 
   const counts = { loan: loans.length, bill: bills.length, subscription: subscriptions.length, receipt: receipts.length }
+  const statsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const cards = statsRef.current ? Array.from(statsRef.current.children) : []
+    if (!cards.length) return
+    gsap.fromTo(cards,
+      { opacity: 0, scale: 0.85, y: 14 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: 'back.out(1.5)', stagger: 0.07 }
+    )
+    return () => { gsap.killTweensOf(cards); gsap.set(cards, { clearProps: 'all' }) }
+  }, [])
 
   return (
     <PageContainer>
@@ -38,7 +50,7 @@ export function HistoryPage() {
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Everything you've tracked, all in one place.</p>
 
       {/* Category stats */}
-      <div className="grid grid-cols-4 gap-2 mb-6">
+      <div ref={statsRef} className="grid grid-cols-4 gap-2 mb-6">
         {(['loan', 'bill', 'subscription', 'receipt'] as const).map((cat) => (
           <button
             key={cat}

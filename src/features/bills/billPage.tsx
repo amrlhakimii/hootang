@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Plus, Receipt, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Button } from '../../components/layout/button'
@@ -32,6 +33,17 @@ export function BillPage() {
   const { bills, addBill, updateStatus, deleteBill, pendingBills } = useBills()
   const [showModal, setShowModal] = useState(false)
   const [activeTab, setActiveTab] = useState('all')
+  const statsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const cards = statsRef.current ? Array.from(statsRef.current.children) : []
+    if (!cards.length) return
+    gsap.fromTo(cards,
+      { opacity: 0, y: 22, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.4)', stagger: 0.09 }
+    )
+    return () => { gsap.killTweensOf(cards); gsap.set(cards, { clearProps: 'all' }) }
+  }, [])
 
   const filtered = bills.filter((b) => {
     if (activeTab === 'pending') return b.status === 'pending'
@@ -47,7 +59,7 @@ export function BillPage() {
       <Navbar title="Bill Tracker" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Bill</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Stay on top of what's due.</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+      <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
         <StatCard label="Pending" value={String(pendingBills.length)} color="#f59e0b" icon={<AlertCircle size={16} />} />
         <StatCard label="Amount due" value={formatCurrency(totalPending)} color="#f87171" icon={<Receipt size={16} />} />
         <div className="col-span-2 md:col-span-1">

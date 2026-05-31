@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Plus, Users } from 'lucide-react'
+import anime from 'animejs'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Button } from '../../components/layout/button'
@@ -13,6 +14,23 @@ export function FriendsPage() {
   const { friends, addFriend, updateFriend, deleteFriend } = useFriends()
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<Friend | null>(null)
+  const countRef = useRef<HTMLParagraphElement>(null)
+  const prevCount = useRef(0)
+
+  useEffect(() => {
+    if (!countRef.current) return
+    const counter = { val: prevCount.current }
+    anime({
+      targets: counter,
+      val: friends.length,
+      duration: 700,
+      easing: 'easeOutExpo',
+      update() {
+        if (countRef.current) countRef.current.textContent = String(Math.round(counter.val))
+      },
+    })
+    prevCount.current = friends.length
+  }, [friends.length])
 
   const handleClose = () => { setShowModal(false); setEditing(null) }
 
@@ -27,7 +45,7 @@ export function FriendsPage() {
           <Users size={22} className="text-[#00ADB5]" />
         </div>
         <div>
-          <p style={{ fontFamily: "'Syne', sans-serif" }} className="text-3xl font-extrabold text-[#00ADB5] leading-none">{friends.length}</p>
+          <p ref={countRef} style={{ fontFamily: "'Syne', sans-serif" }} className="text-3xl font-extrabold text-[#00ADB5] leading-none">{friends.length}</p>
           <p className="text-[#EEEEEE]/40 text-xs mt-0.5">{friends.length === 1 ? 'friend saved' : 'friends saved'}</p>
         </div>
       </div>

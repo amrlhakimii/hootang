@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react'
 import { Edit2, Trash2 } from 'lucide-react'
+import { gsap } from 'gsap'
 import { type Friend } from '../../types/friend'
 import { Button } from '../../components/layout/button'
 import { EmptyState } from '../../components/layout/emptyState'
@@ -12,12 +14,26 @@ interface FriendsListProps {
 const avatarColors = ['#00ADB5', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6']
 
 export function FriendsList({ friends, onEdit, onDelete }: FriendsListProps) {
+  const listRef = useRef<HTMLDivElement>(null)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    if (hasAnimated.current || !listRef.current || friends.length === 0) return
+    hasAnimated.current = true
+    const items = Array.from(listRef.current.children)
+    gsap.fromTo(items,
+      { opacity: 0, scale: 0.88, y: 12 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.38, ease: 'back.out(1.5)', stagger: 0.07 }
+    )
+    return () => { gsap.killTweensOf(items); gsap.set(items, { clearProps: 'all' }) }
+  }, [friends.length])
+
   if (friends.length === 0) {
     return <EmptyState icon="👫" title="No friends yet" description="Add friends to use them across loans, bills, and splits" />
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+    <div ref={listRef} className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
       {friends.map((friend, i) => {
         const color = avatarColors[i % avatarColors.length]
         return (

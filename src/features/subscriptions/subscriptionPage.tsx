@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Plus, Tv, DollarSign } from 'lucide-react'
+import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Button } from '../../components/layout/button'
@@ -25,6 +26,29 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
 export function SubscriptionPage() {
   const { subscriptions, addSubscription, deleteSubscription, togglePayment } = useSubscriptions()
   const [showModal, setShowModal] = useState(false)
+  const statsRef = useRef<HTMLDivElement>(null)
+  const cardsRef = useRef<HTMLDivElement>(null)
+  const hasAnimatedCards = useRef(false)
+
+  useEffect(() => {
+    const cards = statsRef.current ? Array.from(statsRef.current.children) : []
+    if (!cards.length) return
+    gsap.fromTo(cards,
+      { opacity: 0, y: 22, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.4)', stagger: 0.09 }
+    )
+    return () => { gsap.killTweensOf(cards); gsap.set(cards, { clearProps: 'all' }) }
+  }, [])
+
+  useEffect(() => {
+    if (hasAnimatedCards.current || !cardsRef.current || subscriptions.length === 0) return
+    hasAnimatedCards.current = true
+    const items = Array.from(cardsRef.current.children)
+    gsap.fromTo(items,
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', stagger: 0.08, delay: 0.15 }
+    )
+  }, [subscriptions.length])
 
   const totalMonthly = subscriptions.filter((s) => s.billingCycle === 'monthly').reduce((sum, s) => sum + s.totalAmount, 0)
 
@@ -33,7 +57,7 @@ export function SubscriptionPage() {
       <Navbar title="Subscriptions" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Subscription</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Split your streaming costs with the crew.</p>
 
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div ref={statsRef} className="grid grid-cols-2 gap-3 mb-6">
         <StatCard label="Active" value={String(subscriptions.length)} color="#8b5cf6" icon={<Tv size={16} />} />
         <StatCard label="Monthly spend" value={formatCurrency(totalMonthly)} color="#00ADB5" icon={<DollarSign size={16} />} />
       </div>
@@ -41,7 +65,7 @@ export function SubscriptionPage() {
       {subscriptions.length === 0 ? (
         <EmptyState icon="📺" title="No subscriptions yet" description="Split your streaming bills with friends" />
       ) : (
-        <div className="space-y-3">
+        <div ref={cardsRef} className="space-y-3">
           {subscriptions.map((sub) => (
             <SubscriptionCard key={sub.id} subscription={sub} onDelete={deleteSubscription} onToggle={togglePayment} />
           ))}

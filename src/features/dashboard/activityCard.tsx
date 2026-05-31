@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
 import { type Loan } from '../../types/loan'
 import { type Bill } from '../../types/bill'
 import { formatCurrency } from '../../utils/formatCurrency'
@@ -11,6 +13,29 @@ interface ActivityCardProps {
 export function ActivityCard({ loans, bills }: ActivityCardProps) {
   const recentLoans = loans.slice(0, 3)
   const recentBills = bills.filter((b) => b.status === 'pending').slice(0, 3)
+  const loansListRef = useRef<HTMLDivElement>(null)
+  const billsListRef = useRef<HTMLDivElement>(null)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    if (hasAnimated.current) return
+    const loanRows = loansListRef.current ? Array.from(loansListRef.current.children) : []
+    const billRows = billsListRef.current ? Array.from(billsListRef.current.children) : []
+    if (!loanRows.length && !billRows.length) return
+    hasAnimated.current = true
+    if (loanRows.length) {
+      gsap.fromTo(loanRows,
+        { opacity: 0, x: -14 },
+        { opacity: 1, x: 0, duration: 0.32, ease: 'power2.out', stagger: 0.08, delay: 0.25 }
+      )
+    }
+    if (billRows.length) {
+      gsap.fromTo(billRows,
+        { opacity: 0, x: -14 },
+        { opacity: 1, x: 0, duration: 0.32, ease: 'power2.out', stagger: 0.08, delay: 0.35 }
+      )
+    }
+  }, [recentLoans.length, recentBills.length])
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -23,7 +48,7 @@ export function ActivityCard({ loans, bills }: ActivityCardProps) {
             <p className="text-[#EEEEEE]/40 text-sm">No debt yet, nice life</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div ref={loansListRef} className="space-y-2">
             {recentLoans.map((loan) => (
               <div
                 key={loan.id}
@@ -58,7 +83,7 @@ export function ActivityCard({ loans, bills }: ActivityCardProps) {
             <p className="text-[#EEEEEE]/40 text-sm">All bills paid, hero move</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div ref={billsListRef} className="space-y-2">
             {recentBills.map((bill) => (
               <div
                 key={bill.id}

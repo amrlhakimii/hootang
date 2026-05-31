@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Plus, HandCoins, TrendingUp, TrendingDown } from 'lucide-react'
+import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Button } from '../../components/layout/button'
@@ -33,6 +34,17 @@ export function LoanPage() {
   const { loans, addLoan, updateStatus, deleteLoan, totalOwed, totalOwing } = useLoans()
   const [showModal, setShowModal] = useState(false)
   const [activeTab, setActiveTab] = useState('all')
+  const statsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const cards = statsRef.current ? Array.from(statsRef.current.children) : []
+    if (!cards.length) return
+    gsap.fromTo(cards,
+      { opacity: 0, y: 22, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.4)', stagger: 0.09 }
+    )
+    return () => { gsap.killTweensOf(cards); gsap.set(cards, { clearProps: 'all' }) }
+  }, [])
 
   const filtered = loans.filter((l) => {
     if (activeTab === 'lent') return l.type === 'lent'
@@ -46,7 +58,7 @@ export function LoanPage() {
       <Navbar title="Loan Tracker" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Loan</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Track what you lent and borrowed.</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+      <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
         <StatCard label="You are owed" value={formatCurrency(totalOwed)} color="#4ade80" icon={<TrendingUp size={16} />} />
         <StatCard label="You owe" value={formatCurrency(totalOwing)} color="#f87171" icon={<TrendingDown size={16} />} />
         <StatCard label="Total loans" value={String(loans.length)} color="#00ADB5" icon={<HandCoins size={16} />} />
