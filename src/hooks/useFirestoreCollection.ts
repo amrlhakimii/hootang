@@ -10,64 +10,41 @@ import { db } from '../lib/firebase'
 import { useAuth } from '../context/AuthContext'
 
 export function useFirestoreCollection<T extends { id: string }>(
-  localKey: string,
+  _localKey: string,
   collectionName: string,
   initialValue: T[] = []
 ) {
   const { user } = useAuth()
+  const [items, setItemsState] = useState<T[]>(initialValue)
+  const itemsRef = useRef<T[]>(initialValue)
 
-  const [items, setItemsState] = useState<T[]>(() => {
-    try {
-      const stored = localStorage.getItem(localKey)
-      return stored ? (JSON.parse(stored) as T[]) : initialValue
-    } catch {
-      return initialValue
-    }
-  })
-
-  const itemsRef = useRef<T[]>(items)
   useEffect(() => {
     itemsRef.current = items
   }, [items])
 
   useEffect(() => {
     if (!user) {
-      // Guest mode — read from localStorage
-      try {
-        const stored = localStorage.getItem(localKey)
-        setItemsState(stored ? (JSON.parse(stored) as T[]) : initialValue)
-      } catch {
-        setItemsState(initialValue)
-      }
+      setItemsState(initialValue)
       return
     }
 
-    // Signed in — subscribe to Firestore, guest data stays separate
     const colRef = collection(db, 'users', user.uid, collectionName)
 
     const unsubscribe = onSnapshot(query(colRef), (snapshot) => {
       const data = snapshot.docs.map((d) => d.data() as T)
       setItemsState(data)
-      try { localStorage.setItem(localKey, JSON.stringify(data)) } catch {}
     })
 
     return unsubscribe
-  }, [user, collectionName, localKey])
+  }, [user, collectionName])
 
   const setItems = useCallback(
     async (value: T[] | ((prev: T[]) => T[])) => {
+      if (!user) return
+
       const prev = itemsRef.current
       const next = typeof value === 'function' ? (value as (p: T[]) => T[])(prev) : value
 
-      if (!user) {
-        // Guest — write to localStorage only
-        setItemsState(next)
-        itemsRef.current = next
-        try { localStorage.setItem(localKey, JSON.stringify(next)) } catch {}
-        return
-      }
-
-      // Signed in — optimistic update then sync to Firestore
       setItemsState(next)
       itemsRef.current = next
 
@@ -94,7 +71,7 @@ export function useFirestoreCollection<T extends { id: string }>(
 
       if (hasChanges) await batch.commit()
     },
-    [user, collectionName, localKey]
+    [user, collectionName]
   )
 
   return [items, setItems] as const

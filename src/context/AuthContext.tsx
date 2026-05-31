@@ -8,6 +8,14 @@ import {
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 
+const LOCAL_KEYS = [
+  'hootang_friends',
+  'hootang_loans',
+  'hootang_bills',
+  'hootang_subs',
+  'hootang_receipts',
+]
+
 interface AuthContextType {
   user: User | null
   authLoading: boolean
@@ -35,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await signOut(auth)
+    LOCAL_KEYS.forEach((key) => localStorage.removeItem(key))
   }
 
   return (
