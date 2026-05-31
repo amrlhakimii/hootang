@@ -9,8 +9,6 @@ interface ModalProps {
   children: ReactNode
 }
 
-const HEADER_H = 64
-
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   const sheetRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLDivElement>(null)
@@ -47,13 +45,19 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   if (!isOpen) return null
 
+  // Max height = full viewport minus both safe areas minus a 24px gap so the sheet
+  // never reaches the Dynamic Island at the top.
+  // "min(fit-content, ...)" lets the sheet be short when the form is short,
+  // and caps it when the form is tall — giving flex-grow a defined size to fill.
+  const sheetMaxH = 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px)'
+
   return (
     <div
       className="fixed inset-0 z-[200] flex items-end md:items-center justify-center md:p-6"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       onClick={onClose}
     >
-      {/* Backdrop — softer so page content shows through on desktop */}
+      {/* Backdrop */}
       <div
         ref={backdropRef}
         className="absolute inset-0"
@@ -71,20 +75,25 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         style={{
           background: '#2d3440',
           border: '1px solid rgba(0,173,181,0.2)',
-          boxShadow: '0 -8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+          // height adapts to content but never exceeds available space
+          height: `min(fit-content, ${sheetMaxH})`,
+          maxHeight: sheetMaxH,
+          display: 'flex',
+          flexDirection: 'column',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle — mobile only */}
-        <div className="flex justify-center pt-3 pb-1 md:hidden">
+        {/* Drag handle (mobile only) */}
+        <div className="flex justify-center pt-3 pb-1 md:hidden shrink-0">
           <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(238,238,238,0.18)' }} />
         </div>
 
         {/* Header */}
         <div
-          className="flex items-center justify-between"
-          style={{ padding: '14px 20px 14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+          className="flex items-center justify-between shrink-0"
+          style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           <h2 className="text-[#EEEEEE] font-semibold text-base">{title}</h2>
           <button
@@ -95,14 +104,15 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           </button>
         </div>
 
-        {/* Scrollable body */}
+        {/* Scrollable body — flex-grow works because the sheet has a defined height */}
         <div
           style={{
+            flex: '1 1 0px',
+            minHeight: 0,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             padding: '20px',
             paddingBottom: '32px',
-            maxHeight: `calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px - ${HEADER_H}px)`,
           }}
         >
           {children}
