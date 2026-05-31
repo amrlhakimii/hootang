@@ -37,7 +37,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#222831] flex flex-col items-center justify-center px-6 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 relative">
       <FloatingBackground />
       <div className="w-full max-w-sm relative" style={{ zIndex: 1 }}>
         {/* Logo */}

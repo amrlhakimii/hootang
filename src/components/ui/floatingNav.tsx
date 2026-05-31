@@ -27,9 +27,10 @@ export function FloatingNav() {
   const navRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    gsap.from(navRef.current, {
-      y: 80, opacity: 0, duration: 0.6, ease: 'back.out(1.7)', delay: 0.2,
-    })
+    const el = navRef.current
+    if (!el) return
+    gsap.fromTo(el, { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.7)', delay: 0.2 })
+    return () => { gsap.killTweensOf(el); gsap.set(el, { clearProps: 'all' }) }
   }, [])
 
   return (

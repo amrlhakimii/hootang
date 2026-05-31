@@ -5,16 +5,10 @@ export function PageContainer({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(ref.current, {
-        opacity: 0,
-        y: 20,
-        duration: 0.4,
-        ease: 'power2.out',
-        clearProps: 'all',
-      })
-    }, ref)
-    return () => ctx.revert()
+    const el = ref.current
+    if (!el) return
+    gsap.fromTo(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' })
+    return () => { gsap.killTweensOf(el); gsap.set(el, { clearProps: 'all' }) }
   }, [])
 
   return (

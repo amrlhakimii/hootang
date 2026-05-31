@@ -23,7 +23,7 @@ function AppContent() {
   return (
     <BrowserRouter>
       <FloatingBackground />
-      <div className="min-h-screen bg-[#222831] relative" style={{ zIndex: 1 }}>
+      <div className="min-h-screen relative" style={{ zIndex: 1 }}>
         <TopHeader />
         <main style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}>
           <AppRoutes />

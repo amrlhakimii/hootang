@@ -49,46 +49,100 @@ export function DashboardPage() {
   const net = totalOwed - totalOwing
   const activeLoans = loans.filter((l) => l.status === 'pending').length
 
+  const greetingRef = useRef<HTMLHeadingElement>(null)
+  const dateRef = useRef<HTMLParagraphElement>(null)
+  const statusRef = useRef<HTMLParagraphElement>(null)
+  const balanceRef = useRef<HTMLDivElement>(null)
   const actionsRef = useRef<HTMLDivElement>(null)
   const chipsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const tl = gsap.timeline()
+
+    // Date line
+    if (dateRef.current) {
+      tl.fromTo(dateRef.current,
+        { opacity: 0, y: -10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }
+      )
+    }
+
+    // Greeting — split words, stagger in
+    if (greetingRef.current) {
+      const text = greetingRef.current.textContent || ''
+      greetingRef.current.innerHTML = text.split('').map(
+        (ch) => `<span style="display:inline-block">${ch === ' ' ? '&nbsp;' : ch}</span>`
+      ).join('')
+      const chars = Array.from(greetingRef.current.children)
+      tl.fromTo(chars,
+        { opacity: 0, y: 20, rotationX: -60 },
+        { opacity: 1, y: 0, rotationX: 0, duration: 0.5, ease: 'back.out(2)', stagger: 0.03 },
+        '-=0.25'
+      )
+    }
+
+    // Status line
+    if (statusRef.current) {
+      tl.fromTo(statusRef.current,
+        { opacity: 0, x: -16 },
+        { opacity: 1, x: 0, duration: 0.4, ease: 'power3.out' },
+        '-=0.2'
+      )
+    }
+
+    // Balance card
+    if (balanceRef.current) {
+      tl.fromTo(balanceRef.current,
+        { opacity: 0, scale: 0.93, y: 24 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: 'back.out(1.4)' },
+        '-=0.1'
+      )
+    }
+
+    // Quick action buttons
     const actions = actionsRef.current ? Array.from(actionsRef.current.children) : []
-    const chips = chipsRef.current ? Array.from(chipsRef.current.children) : []
     if (actions.length) {
-      gsap.fromTo(actions,
-        { opacity: 0, scale: 0.85, y: 10 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.5)', stagger: 0.06 }
+      tl.fromTo(actions,
+        { opacity: 0, scale: 0.8, y: 14 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: 'back.out(2)', stagger: 0.07 },
+        '-=0.1'
       )
     }
+
+    // Chips
+    const chips = chipsRef.current ? Array.from(chipsRef.current.children) : []
     if (chips.length) {
-      gsap.fromTo(chips,
-        { opacity: 0, x: -12 },
-        { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out', stagger: 0.08, delay: 0.15 }
+      tl.fromTo(chips,
+        { opacity: 0, x: -16 },
+        { opacity: 1, x: 0, duration: 0.35, ease: 'power3.out', stagger: 0.07 },
+        '-=0.2'
       )
     }
+
     return () => {
-      gsap.killTweensOf(actions); gsap.set(actions, { clearProps: 'all' })
-      gsap.killTweensOf(chips); gsap.set(chips, { clearProps: 'all' })
+      tl.kill()
+      gsap.set([...actions, ...chips], { clearProps: 'all' })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <PageContainer>
       {/* Personal greeting */}
       <div className="mb-5">
-        <p className="text-[#EEEEEE]/30 text-xs font-semibold uppercase tracking-widest mb-1.5">{getDate()}</p>
+        <p ref={dateRef} className="text-[#EEEEEE]/30 text-xs font-semibold uppercase tracking-widest mb-1.5">{getDate()}</p>
         <h1
+          ref={greetingRef}
           style={{ fontFamily: "'Syne', sans-serif" }}
           className="text-2xl md:text-3xl font-extrabold text-[#EEEEEE] leading-tight mb-1.5"
         >
           {getGreeting()}
         </h1>
-        <p className="text-[#EEEEEE]/50 text-sm">{getStatusLine(net, pendingBills.length)}</p>
+        <p ref={statusRef} className="text-[#EEEEEE]/50 text-sm">{getStatusLine(net, pendingBills.length)}</p>
       </div>
 
       {/* Hero balance card */}
-      <div className="mb-5">
+      <div ref={balanceRef} className="mb-5">
         <BalanceCard owed={totalOwed} owing={totalOwing} />
       </div>
 
