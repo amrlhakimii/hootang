@@ -9,6 +9,13 @@ interface ModalProps {
   children: ReactNode
 }
 
+// All the fixed chrome above the scrollable area:
+//   24px  — breathing gap so sheet never touches Dynamic Island
+//   24px  — drag handle row (pt-3 + pb-1 + 4px pill)
+//   52px  — header row (14px padding top + 14px bottom + ~24px text)
+// = 100px total subtracted from available viewport height
+const CHROME = 100
+
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   const sheetRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLDivElement>(null)
@@ -28,7 +35,6 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     const backdrop = backdropRef.current
 
     gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power1.out' })
-
     if (isMobile) {
       gsap.fromTo(sheet, { y: '100%' }, { y: '0%', duration: 0.38, ease: 'power3.out' })
     } else {
@@ -44,12 +50,6 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   }, [isOpen])
 
   if (!isOpen) return null
-
-  // Max height = full viewport minus both safe areas minus a 24px gap so the sheet
-  // never reaches the Dynamic Island at the top.
-  // "min(fit-content, ...)" lets the sheet be short when the form is short,
-  // and caps it when the form is tall — giving flex-grow a defined size to fill.
-  const sheetMaxH = 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px)'
 
   return (
     <div
@@ -68,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         }}
       />
 
-      {/* Sheet */}
+      {/* Sheet — no height set, grows with content, clipped by overflow:hidden */}
       <div
         ref={sheetRef}
         className="relative w-full md:max-w-md rounded-t-[20px] md:rounded-[20px]"
@@ -76,23 +76,18 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           background: '#2d3440',
           border: '1px solid rgba(0,173,181,0.2)',
           boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
-          // height adapts to content but never exceeds available space
-          height: `min(fit-content, ${sheetMaxH})`,
-          maxHeight: sheetMaxH,
-          display: 'flex',
-          flexDirection: 'column',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle (mobile only) */}
-        <div className="flex justify-center pt-3 pb-1 md:hidden shrink-0">
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(238,238,238,0.18)' }} />
+        {/* Drag handle */}
+        <div className="flex justify-center md:hidden" style={{ paddingTop: 12, paddingBottom: 8 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(238,238,238,0.2)' }} />
         </div>
 
         {/* Header */}
         <div
-          className="flex items-center justify-between shrink-0"
+          className="flex items-center justify-between"
           style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           <h2 className="text-[#EEEEEE] font-semibold text-base">{title}</h2>
@@ -104,15 +99,14 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           </button>
         </div>
 
-        {/* Scrollable body — flex-grow works because the sheet has a defined height */}
+        {/* Scroll body — maxHeight is the only constraint needed */}
         <div
           style={{
-            flex: '1 1 0px',
-            minHeight: 0,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             padding: '20px',
             paddingBottom: '32px',
+            maxHeight: `calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - ${CHROME}px)`,
           }}
         >
           {children}
