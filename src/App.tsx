@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import { useAuth } from './context/AuthContext'
 import { TopHeader } from './components/ui/mobileHeader'
 import { FloatingNav } from './components/ui/floatingNav'
+import { FloatingBackground } from './components/ui/floatingBackground'
 import { AppRoutes } from './routes/appRoutes'
 import { LoginPage } from './features/auth/LoginPage'
 
@@ -21,7 +22,8 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#222831]">
+      <FloatingBackground />
+      <div className="min-h-screen bg-[#222831] relative" style={{ zIndex: 1 }}>
         <TopHeader />
         <main style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}>
           <AppRoutes />

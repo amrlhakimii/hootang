@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Cloud, Smartphone, RefreshCw } from 'lucide-react'
 import { gsap } from 'gsap'
 import { useAuth } from '../../context/AuthContext'
+import { FloatingBackground } from '../../components/ui/floatingBackground'
 
 export function LoginPage() {
   const { signInWithGoogle } = useAuth()
@@ -36,8 +37,9 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#222831] flex flex-col items-center justify-center px-6">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-[#222831] flex flex-col items-center justify-center px-6 relative">
+      <FloatingBackground />
+      <div className="w-full max-w-sm relative" style={{ zIndex: 1 }}>
         {/* Logo */}
         <div ref={logoRef} className="text-center mb-10">
           <h1
