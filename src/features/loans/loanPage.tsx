@@ -35,8 +35,8 @@ export function LoanPage() {
   const [activeTab, setActiveTab] = useState('all')
 
   const filtered = loans.filter((l) => {
-    if (activeTab === 'lent') return l.type === 'lent' && l.status === 'pending'
-    if (activeTab === 'borrowed') return l.type === 'borrowed' && l.status === 'pending'
+    if (activeTab === 'lent') return l.type === 'lent'
+    if (activeTab === 'borrowed') return l.type === 'borrowed'
     if (activeTab === 'settled') return l.status === 'settled'
     return true
   })

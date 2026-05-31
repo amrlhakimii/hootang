@@ -134,7 +134,12 @@ export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
           </Select>
         </div>
         <div className="flex gap-2">
-          <Input placeholder="Custom name" value={customName} onChange={(e) => setCustomName(e.target.value)} />
+          <Input
+            placeholder="Custom name"
+            value={customName}
+            onChange={(e) => setCustomName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addParticipant(customName); setCustomName('') } }}
+          />
           <Button type="button" variant="secondary" onClick={() => { addParticipant(customName); setCustomName('') }}>Add</Button>
         </div>
         {participants.length > 0 && (

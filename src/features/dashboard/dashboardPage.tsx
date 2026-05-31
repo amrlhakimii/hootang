@@ -33,7 +33,7 @@ function getStatusLine(net: number, pendingCount: number): string {
 const quickActions = [
   { label: 'Add Loan', emoji: '🤝', path: '/loans', color: '#00ADB5' },
   { label: 'Add Bill', emoji: '📄', path: '/bills', color: '#f59e0b' },
-  { label: 'Split Receipt', emoji: '🧾', path: '/receipts', color: '#ec4899' },
+  { label: 'Split Receipt', emoji: '🧾', path: '/receipt', color: '#ec4899' },
   { label: 'Roll Dice', emoji: '🎲', path: '/dice', color: '#8b5cf6' },
 ]
 

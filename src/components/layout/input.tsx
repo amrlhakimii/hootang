@@ -1,11 +1,14 @@
-import { type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { forwardRef, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 
 const baseClass =
   'w-full bg-[#222831] border border-[#393E46] text-[#EEEEEE] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#00ADB5] transition-colors placeholder:text-[#EEEEEE]/30'
 
-export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={`${baseClass} ${className}`} {...props} />
-}
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  ({ className = '', ...props }, ref) => (
+    <input ref={ref} className={`${baseClass} ${className}`} {...props} />
+  )
+)
+Input.displayName = 'Input'
 
 export function Select({ className = '', children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
