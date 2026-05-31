@@ -9,6 +9,9 @@ interface ModalProps {
   children: ReactNode
 }
 
+// Header is padding 20px top+bottom + ~22px text ≈ 62px
+const HEADER_H = 62
+
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   const sheetRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLDivElement>(null)
@@ -36,8 +39,10 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     }
 
     return () => {
-      gsap.killTweensOf(sheet); gsap.set(sheet, { clearProps: 'all' })
-      gsap.killTweensOf(backdrop); gsap.set(backdrop, { clearProps: 'all' })
+      gsap.killTweensOf(sheet)
+      gsap.killTweensOf(backdrop)
+      gsap.set(sheet, { clearProps: 'transform,opacity' })
+      gsap.set(backdrop, { clearProps: 'opacity' })
     }
   }, [isOpen])
 
@@ -50,16 +55,13 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       onClick={onClose}
     >
       <div ref={backdropRef} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+
       <div
         ref={sheetRef}
         className="relative w-full md:max-w-md shadow-2xl rounded-t-2xl md:rounded-2xl"
         style={{
           background: '#393E46',
-          borderTop: '1px solid rgba(0,173,181,0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          // leave room for Dynamic Island at top + home indicator already handled by container padding
-          maxHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px)',
+          border: '1px solid rgba(0,173,181,0.15)',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -78,15 +80,15 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           </button>
         </div>
 
-        {/* Scrollable body */}
+        {/* Scrollable body — explicit maxHeight so Safari never collapses it */}
         <div
           style={{
-            flex: '1 1 0px',
-            minHeight: 0,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             padding: '20px',
             paddingBottom: '32px',
+            // total room = viewport - top notch - bottom indicator - 24px breathing - header
+            maxHeight: `calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px - ${HEADER_H}px)`,
           }}
         >
           {children}
