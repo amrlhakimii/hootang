@@ -23,7 +23,7 @@ const links = [
 
 export function FloatingNav() {
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
+    <div className="fixed left-1/2 -translate-x-1/2 z-50" style={{ bottom: 'calc(20px + env(safe-area-inset-bottom))' }}>
       <nav
         className="flex items-center gap-1 p-1.5 rounded-full"
         style={{

@@ -23,7 +23,7 @@ function AppContent() {
     <BrowserRouter>
       <div className="min-h-screen bg-[#222831]">
         <TopHeader />
-        <main className="pb-28">
+        <main style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}>
           <AppRoutes />
         </main>
       </div>
