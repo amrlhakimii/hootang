@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
+import { gsap } from 'gsap'
 import {
   LayoutDashboard,
   HandCoins,
@@ -22,8 +24,16 @@ const links = [
 ]
 
 export function FloatingNav() {
+  const navRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    gsap.from(navRef.current, {
+      y: 80, opacity: 0, duration: 0.6, ease: 'back.out(1.7)', delay: 0.2,
+    })
+  }, [])
+
   return (
-    <div className="fixed left-1/2 -translate-x-1/2 z-50" style={{ bottom: 'calc(20px + env(safe-area-inset-bottom))' }}>
+    <div ref={navRef} className="fixed left-1/2 -translate-x-1/2 z-50" style={{ bottom: 'calc(20px + env(safe-area-inset-bottom))' }}>
       <nav
         className="flex items-center gap-1 p-1.5 rounded-full"
         style={{

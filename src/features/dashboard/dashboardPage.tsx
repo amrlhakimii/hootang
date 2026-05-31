@@ -1,5 +1,7 @@
+import { useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { HandCoins, Receipt, Tv, UtensilsCrossed } from 'lucide-react'
+import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { BalanceCard } from './balanceCard'
 import { ActivityCard } from './activityCard'
@@ -47,6 +49,23 @@ export function DashboardPage() {
   const net = totalOwed - totalOwing
   const activeLoans = loans.filter((l) => l.status === 'pending').length
 
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const chipsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(actionsRef.current!.children, {
+        opacity: 0, scale: 0.85, y: 10,
+        duration: 0.35, ease: 'back.out(1.5)', stagger: 0.06, clearProps: 'all',
+      })
+      gsap.from(chipsRef.current!.children, {
+        opacity: 0, x: -12,
+        duration: 0.3, ease: 'power2.out', stagger: 0.08, delay: 0.15, clearProps: 'all',
+      })
+    })
+    return () => ctx.revert()
+  }, [])
+
   return (
     <PageContainer>
       {/* Personal greeting */}
@@ -69,7 +88,7 @@ export function DashboardPage() {
       {/* Quick actions */}
       <div className="mb-5">
         <p className="text-[#EEEEEE]/30 text-[10px] font-semibold uppercase tracking-widest mb-3">Quick actions</p>
-        <div className="grid grid-cols-4 gap-2">
+        <div ref={actionsRef} className="grid grid-cols-4 gap-2">
           {quickActions.map((action) => (
             <button
               key={action.path}
@@ -93,7 +112,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stat chips row */}
-      <div className="flex gap-2 overflow-x-auto mb-5" style={{ scrollbarWidth: 'none' }}>
+      <div ref={chipsRef} className="flex gap-2 overflow-x-auto mb-5" style={{ scrollbarWidth: 'none' }}>
         {[
           { icon: <HandCoins size={14} />, label: 'Active Loans', value: activeLoans, color: '#00ADB5' },
           { icon: <Receipt size={14} />, label: 'Pending Bills', value: pendingBills.length, color: '#f59e0b' },

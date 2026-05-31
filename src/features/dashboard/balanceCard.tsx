@@ -1,5 +1,6 @@
-import { formatCurrency } from '../../utils/formatCurrency'
+import { useEffect, useRef } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import anime from 'animejs'
 
 interface BalanceCardProps {
   owed: number
@@ -8,6 +9,29 @@ interface BalanceCardProps {
 
 export function BalanceCard({ owed, owing }: BalanceCardProps) {
   const net = owed - owing
+  const netRef = useRef<HTMLParagraphElement>(null)
+  const owedRef = useRef<HTMLParagraphElement>(null)
+  const owingRef = useRef<HTMLParagraphElement>(null)
+
+  useEffect(() => {
+    const fmt = (v: number) => `RM ${Math.abs(v).toFixed(2)}`
+    const prefix = net >= 0 ? '+' : '-'
+
+    const counter = { net: 0, owed: 0, owing: 0 }
+    anime({
+      targets: counter,
+      net: Math.abs(net),
+      owed,
+      owing,
+      duration: 900,
+      easing: 'easeOutExpo',
+      update() {
+        if (netRef.current) netRef.current.textContent = `${prefix}RM ${counter.net.toFixed(2)}`
+        if (owedRef.current) owedRef.current.textContent = fmt(counter.owed)
+        if (owingRef.current) owingRef.current.textContent = fmt(counter.owing)
+      },
+    })
+  }, [net, owed, owing])
   const positive = net >= 0
   const total = owed + owing
   const owedPct = total > 0 ? (owed / total) * 100 : 50
@@ -69,11 +93,10 @@ export function BalanceCard({ owed, owing }: BalanceCardProps) {
 
         {/* Big number */}
         <p
+          ref={netRef}
           style={{ fontFamily: "'Syne', sans-serif" }}
           className="text-5xl md:text-6xl font-extrabold text-white leading-none tracking-tight mb-6"
-        >
-          {positive ? '+' : ''}{formatCurrency(net)}
-        </p>
+        />
 
         {/* Ratio bar */}
         {total > 0 && (
@@ -99,12 +122,12 @@ export function BalanceCard({ owed, owing }: BalanceCardProps) {
         <div className="flex gap-6">
           <div>
             <p className="text-white/45 text-xs mb-0.5">You are owed</p>
-            <p className="text-white font-bold text-lg leading-none">{formatCurrency(owed)}</p>
+            <p ref={owedRef} className="text-white font-bold text-lg leading-none" />
           </div>
           <div className="w-px" style={{ background: 'rgba(255,255,255,0.15)' }} />
           <div>
             <p className="text-white/45 text-xs mb-0.5">You owe</p>
-            <p className="text-white font-bold text-lg leading-none">{formatCurrency(owing)}</p>
+            <p ref={owingRef} className="text-white font-bold text-lg leading-none" />
           </div>
         </div>
       </div>

@@ -1,11 +1,20 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Cloud, Smartphone, RefreshCw } from 'lucide-react'
+import { gsap } from 'gsap'
 import { useAuth } from '../../context/AuthContext'
 
 export function LoginPage() {
   const { signInWithGoogle } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const logoRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const tl = gsap.timeline()
+    tl.from(logoRef.current, { opacity: 0, y: -20, duration: 0.5, ease: 'power2.out' })
+      .from(cardRef.current, { opacity: 0, y: 24, duration: 0.45, ease: 'power2.out' }, '-=0.2')
+  }, [])
 
   const handleGoogle = async () => {
     setLoading(true)
@@ -23,7 +32,7 @@ export function LoginPage() {
     <div className="min-h-screen bg-[#222831] flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-10">
+        <div ref={logoRef} className="text-center mb-10">
           <h1
             style={{ fontFamily: "'Syne', sans-serif" }}
             className="text-4xl font-extrabold tracking-tight mb-2"
@@ -38,6 +47,7 @@ export function LoginPage() {
 
         {/* Card */}
         <div
+          ref={cardRef}
           className="rounded-3xl p-6"
           style={{
             background: '#2d3440',
