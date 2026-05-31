@@ -9,8 +9,7 @@ interface ModalProps {
   children: ReactNode
 }
 
-// Header is padding 20px top+bottom + ~22px text ≈ 62px
-const HEADER_H = 62
+const HEADER_H = 64
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   const sheetRef = useRef<HTMLDivElement>(null)
@@ -33,9 +32,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power1.out' })
 
     if (isMobile) {
-      gsap.fromTo(sheet, { y: '100%' }, { y: '0%', duration: 0.35, ease: 'power3.out' })
+      gsap.fromTo(sheet, { y: '100%' }, { y: '0%', duration: 0.38, ease: 'power3.out' })
     } else {
-      gsap.fromTo(sheet, { opacity: 0, scale: 0.95, y: 12 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'power2.out' })
+      gsap.fromTo(sheet, { opacity: 0, scale: 0.96, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.28, ease: 'power2.out' })
     }
 
     return () => {
@@ -50,44 +49,59 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center md:p-4"
+      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center md:p-6"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       onClick={onClose}
     >
-      <div ref={backdropRef} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      {/* Backdrop — softer so page content shows through on desktop */}
+      <div
+        ref={backdropRef}
+        className="absolute inset-0"
+        style={{
+          background: 'rgba(10,14,20,0.55)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+        }}
+      />
 
+      {/* Sheet */}
       <div
         ref={sheetRef}
-        className="relative w-full md:max-w-md shadow-2xl rounded-t-2xl md:rounded-2xl"
+        className="relative w-full md:max-w-md rounded-t-[20px] md:rounded-[20px]"
         style={{
-          background: '#393E46',
-          border: '1px solid rgba(0,173,181,0.15)',
+          background: '#2d3440',
+          border: '1px solid rgba(0,173,181,0.2)',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center pt-3 pb-1 md:hidden">
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(238,238,238,0.18)' }} />
+        </div>
+
         {/* Header */}
         <div
-          className="flex items-center justify-between shrink-0"
-          style={{ padding: '20px', borderBottom: '1px solid #222831' }}
+          className="flex items-center justify-between"
+          style={{ padding: '14px 20px 14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           <h2 className="text-[#EEEEEE] font-semibold text-base">{title}</h2>
           <button
             onClick={onClose}
-            className="text-[#EEEEEE]/40 hover:text-[#EEEEEE] transition-colors cursor-pointer"
+            className="text-[#EEEEEE]/40 hover:text-[#EEEEEE] transition-colors cursor-pointer p-1"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Scrollable body — explicit maxHeight so Safari never collapses it */}
+        {/* Scrollable body */}
         <div
           style={{
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             padding: '20px',
             paddingBottom: '32px',
-            // total room = viewport - top notch - bottom indicator - 24px breathing - header
             maxHeight: `calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px - ${HEADER_H}px)`,
           }}
         >
