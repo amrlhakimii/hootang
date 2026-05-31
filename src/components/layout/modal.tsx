@@ -24,27 +24,20 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useEffect(() => {
     if (!isOpen || !sheetRef.current || !backdropRef.current) return
     const isMobile = window.innerWidth < 768
+    const sheet = sheetRef.current
+    const backdrop = backdropRef.current
 
-    gsap.from(backdropRef.current, {
-      opacity: 0,
-      duration: 0.25,
-      ease: 'power1.out',
-    })
+    gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power1.out' })
 
     if (isMobile) {
-      gsap.from(sheetRef.current, {
-        y: '100%',
-        duration: 0.35,
-        ease: 'power3.out',
-      })
+      gsap.fromTo(sheet, { y: '100%' }, { y: '0%', duration: 0.35, ease: 'power3.out' })
     } else {
-      gsap.from(sheetRef.current, {
-        opacity: 0,
-        scale: 0.95,
-        y: 12,
-        duration: 0.3,
-        ease: 'power2.out',
-      })
+      gsap.fromTo(sheet, { opacity: 0, scale: 0.95, y: 12 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'power2.out' })
+    }
+
+    return () => {
+      gsap.killTweensOf(sheet); gsap.set(sheet, { clearProps: 'all' })
+      gsap.killTweensOf(backdrop); gsap.set(backdrop, { clearProps: 'all' })
     }
   }, [isOpen])
 

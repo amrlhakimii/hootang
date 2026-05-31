@@ -11,9 +11,16 @@ export function LoginPage() {
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const logo = logoRef.current
+    const card = cardRef.current
+    if (!logo || !card) return
     const tl = gsap.timeline()
-    tl.from(logoRef.current, { opacity: 0, y: -20, duration: 0.5, ease: 'power2.out' })
-      .from(cardRef.current, { opacity: 0, y: 24, duration: 0.45, ease: 'power2.out' }, '-=0.2')
+    tl.fromTo(logo, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
+      .fromTo(card, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '-=0.2')
+    return () => {
+      tl.kill()
+      gsap.set([logo, card], { clearProps: 'all' })
+    }
   }, [])
 
   const handleGoogle = async () => {

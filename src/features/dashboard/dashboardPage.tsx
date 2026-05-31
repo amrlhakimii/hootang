@@ -53,17 +53,24 @@ export function DashboardPage() {
   const chipsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(actionsRef.current!.children, {
-        opacity: 0, scale: 0.85, y: 10,
-        duration: 0.35, ease: 'back.out(1.5)', stagger: 0.06, clearProps: 'all',
-      })
-      gsap.from(chipsRef.current!.children, {
-        opacity: 0, x: -12,
-        duration: 0.3, ease: 'power2.out', stagger: 0.08, delay: 0.15, clearProps: 'all',
-      })
-    })
-    return () => ctx.revert()
+    const actions = actionsRef.current ? Array.from(actionsRef.current.children) : []
+    const chips = chipsRef.current ? Array.from(chipsRef.current.children) : []
+    if (actions.length) {
+      gsap.fromTo(actions,
+        { opacity: 0, scale: 0.85, y: 10 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.5)', stagger: 0.06 }
+      )
+    }
+    if (chips.length) {
+      gsap.fromTo(chips,
+        { opacity: 0, x: -12 },
+        { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out', stagger: 0.08, delay: 0.15 }
+      )
+    }
+    return () => {
+      gsap.killTweensOf(actions); gsap.set(actions, { clearProps: 'all' })
+      gsap.killTweensOf(chips); gsap.set(chips, { clearProps: 'all' })
+    }
   }, [])
 
   return (
