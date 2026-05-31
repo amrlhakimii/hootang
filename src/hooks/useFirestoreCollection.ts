@@ -4,7 +4,6 @@ import {
   doc,
   onSnapshot,
   writeBatch,
-  getDocs,
   query,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -31,12 +30,9 @@ export function useFirestoreCollection<T extends { id: string }>(
     itemsRef.current = items
   }, [items])
 
-  const migratedRef = useRef(false)
-
   useEffect(() => {
     if (!user) {
       // Guest mode — read from localStorage
-      migratedRef.current = false
       try {
         const stored = localStorage.getItem(localKey)
         setItemsState(stored ? (JSON.parse(stored) as T[]) : initialValue)
@@ -46,25 +42,8 @@ export function useFirestoreCollection<T extends { id: string }>(
       return
     }
 
+    // Signed in — subscribe to Firestore, guest data stays separate
     const colRef = collection(db, 'users', user.uid, collectionName)
-
-    // On first sign-in, migrate existing localStorage data to Firestore
-    const migrate = async () => {
-      if (migratedRef.current) return
-      migratedRef.current = true
-      try {
-        const snapshot = await getDocs(query(colRef))
-        if (!snapshot.empty) return
-        const stored = localStorage.getItem(localKey)
-        const localData: T[] = stored ? JSON.parse(stored) : []
-        if (localData.length === 0) return
-        const batch = writeBatch(db)
-        localData.forEach((item) => batch.set(doc(colRef, item.id), item))
-        await batch.commit()
-      } catch {}
-    }
-
-    migrate()
 
     const unsubscribe = onSnapshot(query(colRef), (snapshot) => {
       const data = snapshot.docs.map((d) => d.data() as T)
