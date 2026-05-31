@@ -6,9 +6,11 @@ import { FloatingNav } from './components/ui/floatingNav'
 import { FloatingBackground } from './components/ui/floatingBackground'
 import { AppRoutes } from './routes/appRoutes'
 import { LoginPage } from './features/auth/LoginPage'
+import { usePushNotifications } from './hooks/usePushNotifications'
 
 function AppContent() {
   const { user, authLoading } = useAuth()
+  usePushNotifications()
 
   if (authLoading) {
     return (

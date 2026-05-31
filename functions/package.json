@@ -1,0 +1,18 @@
+{
+  "name": "hootang-functions",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "deploy": "npm run build && firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "main": "lib/index.js",
+  "engines": { "node": "20" }
+}
