@@ -3,8 +3,10 @@ import { UserMenu } from '../../features/auth/UserMenu'
 export function TopHeader() {
   return (
     <header
-      className="sticky top-0 z-30 px-5 py-3 flex items-center justify-between"
+      className="sticky top-0 z-30 px-5 flex items-center justify-between"
       style={{
+        paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
+        paddingBottom: '12px',
         background: 'rgba(34, 40, 49, 0.7)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
