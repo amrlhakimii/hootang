@@ -51,10 +51,22 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       <div ref={backdropRef} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         ref={sheetRef}
-        className="relative bg-[#393E46] w-full md:max-w-md shadow-2xl border-t md:border border-[#00ADB5]/20 rounded-t-2xl md:rounded-2xl max-h-[88dvh] flex flex-col"
+        className="relative w-full md:max-w-md shadow-2xl rounded-t-2xl md:rounded-2xl"
+        style={{
+          background: '#393E46',
+          borderTop: '1px solid rgba(0,173,181,0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '88dvh',
+          overflow: 'hidden',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#222831] shrink-0">
+        {/* Header — fixed, never scrolls */}
+        <div
+          className="flex items-center justify-between shrink-0"
+          style={{ padding: '20px', borderBottom: '1px solid #222831' }}
+        >
           <h2 className="text-[#EEEEEE] font-semibold text-base">{title}</h2>
           <button
             onClick={onClose}
@@ -63,9 +75,17 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <X size={18} />
           </button>
         </div>
+
+        {/* Scrollable body */}
         <div
-          className="p-5 overflow-y-auto flex-1 min-h-0"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
+          style={{
+            flex: '1 1 0px',
+            minHeight: 0,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            padding: '20px',
+            paddingBottom: 'calc(env(safe-area-inset-bottom) + 28px)',
+          }}
         >
           {children}
         </div>
