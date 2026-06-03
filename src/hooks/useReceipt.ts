@@ -10,9 +10,13 @@ export function useReceipts() {
     setReceipts((prev) => [receipt, ...prev])
   }
 
+  const updateReceipt = (updated: Receipt) => {
+    setReceipts((prev) => prev.map((r) => r.id === updated.id ? updated : r))
+  }
+
   const deleteReceipt = (id: string) => {
     setReceipts((prev) => prev.filter((r) => r.id !== id))
   }
 
-  return { receipts, addReceipt, deleteReceipt }
+  return { receipts, addReceipt, updateReceipt, deleteReceipt }
 }

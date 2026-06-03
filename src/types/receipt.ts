@@ -2,10 +2,13 @@ export interface ReceiptItem {
   id: string
   name: string
   price: number
-  assignedTo: string[] // friend names
+  quantity: number
+  assignedTo: string[]
 }
 
-export type SplitMode = 'equal' | 'itemized'
+export type SplitMode = 'equal' | 'itemized' | 'percentage'
+
+export type ReceiptCategory = 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'utilities' | 'other'
 
 export interface Receipt {
   id: string
@@ -13,7 +16,12 @@ export interface Receipt {
   items: ReceiptItem[]
   tax: number
   serviceCharge: number
+  discount: number
   participants: string[]
   splitMode: SplitMode
+  percentages: Record<string, number>
+  paidBy: string
+  category: ReceiptCategory
+  settledBy: string[]
   date: string
 }

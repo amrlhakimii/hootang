@@ -12,38 +12,47 @@ export function AssignPeople({ items, participants, onToggle }: AssignPeopleProp
 
   return (
     <div className="space-y-2">
-      {items.map((item) => (
-        <div key={item.id} className="bg-[#222831] rounded-xl p-3">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[#EEEEEE] text-sm font-medium">{item.name}</p>
-            <p className="text-[#00ADB5] text-sm font-semibold">{formatCurrency(item.price)}</p>
+      {items.map((item) => {
+        const qty = item.quantity ?? 1
+        const itemTotal = item.price * qty
+        return (
+          <div key={item.id} className="bg-[#222831] rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-[#EEEEEE] text-sm font-medium">{item.name}</p>
+                {qty > 1 && (
+                  <p className="text-[#EEEEEE]/40 text-xs">{qty} × {formatCurrency(item.price)}</p>
+                )}
+              </div>
+              <p className="text-[#00ADB5] text-sm font-semibold">{formatCurrency(itemTotal)}</p>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {participants.map((person) => {
+                const assigned = item.assignedTo.includes(person)
+                return (
+                  <button
+                    key={person}
+                    type="button"
+                    onClick={() => onToggle(item.id, person)}
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                      assigned
+                        ? 'bg-[#00ADB5] text-[#222831]'
+                        : 'bg-[#393E46] text-[#EEEEEE]/50 hover:text-[#EEEEEE]'
+                    }`}
+                  >
+                    {person}
+                  </button>
+                )
+              })}
+            </div>
+            {item.assignedTo.length > 0 && (
+              <p className="text-[#EEEEEE]/30 text-xs mt-1">
+                {formatCurrency(itemTotal / item.assignedTo.length)} each
+              </p>
+            )}
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {participants.map((person) => {
-              const assigned = item.assignedTo.includes(person)
-              return (
-                <button
-                  key={person}
-                  type="button"
-                  onClick={() => onToggle(item.id, person)}
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                    assigned
-                      ? 'bg-[#00ADB5] text-[#222831]'
-                      : 'bg-[#393E46] text-[#EEEEEE]/50 hover:text-[#EEEEEE]'
-                  }`}
-                >
-                  {person}
-                </button>
-              )
-            })}
-          </div>
-          {item.assignedTo.length > 0 && (
-            <p className="text-[#EEEEEE]/30 text-xs mt-1">
-              {formatCurrency(item.price / item.assignedTo.length)} each
-            </p>
-          )}
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

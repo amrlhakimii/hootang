@@ -5,29 +5,46 @@ import { Button } from '../../components/layout/button'
 import { Tabs } from '../../components/layout/tabs'
 import { ItemForm } from './itemForm'
 import { AssignPeople } from './assignPeople'
+import { PercentageSplit } from './percentageSplit'
 import { SplitSummary } from './splitSummary'
-import { type Receipt, type ReceiptItem, type SplitMode } from '../../types/receipt'
+import { type Receipt, type ReceiptItem, type SplitMode, type ReceiptCategory } from '../../types/receipt'
 import { useFriends } from '../../hooks/useFriends'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 interface ReceiptFormProps {
   onSave: (data: Omit<Receipt, 'id'>) => void
   onCancel: () => void
+  initialData?: Omit<Receipt, 'id'>
 }
 
 const splitTabs = [
-  { id: 'equal', label: 'Equal Split' },
+  { id: 'equal', label: 'Equal' },
   { id: 'itemized', label: 'Itemized' },
+  { id: 'percentage', label: 'Custom %' },
 ]
 
-export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
+const CATEGORIES: { value: ReceiptCategory; label: string }[] = [
+  { value: 'food', label: '🍜 Food & Drinks' },
+  { value: 'transport', label: '🚗 Transport' },
+  { value: 'accommodation', label: '🏨 Accommodation' },
+  { value: 'entertainment', label: '🎬 Entertainment' },
+  { value: 'shopping', label: '🛍️ Shopping' },
+  { value: 'utilities', label: '⚡ Utilities' },
+  { value: 'other', label: '📦 Other' },
+]
+
+export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps) {
   const { friends } = useFriends()
-  const [title, setTitle] = useState('')
-  const [items, setItems] = useState<ReceiptItem[]>([])
-  const [tax, setTax] = useState('6')
-  const [serviceCharge, setServiceCharge] = useState('10')
-  const [participants, setParticipants] = useState<string[]>([])
-  const [splitMode, setSplitMode] = useState<SplitMode>('equal')
+  const [title, setTitle] = useState(initialData?.title ?? '')
+  const [items, setItems] = useState<ReceiptItem[]>(initialData?.items ?? [])
+  const [tax, setTax] = useState(String(initialData?.tax ?? 6))
+  const [serviceCharge, setServiceCharge] = useState(String(initialData?.serviceCharge ?? 10))
+  const [discount, setDiscount] = useState(String(initialData?.discount ?? 0))
+  const [participants, setParticipants] = useState<string[]>(initialData?.participants ?? [])
+  const [splitMode, setSplitMode] = useState<SplitMode>(initialData?.splitMode ?? 'equal')
+  const [percentages, setPercentages] = useState<Record<string, number>>(initialData?.percentages ?? {})
+  const [paidBy, setPaidBy] = useState(initialData?.paidBy ?? '')
+  const [category, setCategory] = useState<ReceiptCategory>(initialData?.category ?? 'food')
   const [customName, setCustomName] = useState('')
   const [step, setStep] = useState<'setup' | 'summary'>('setup')
 
@@ -41,6 +58,12 @@ export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
       ...item,
       assignedTo: item.assignedTo.filter((n) => n !== name),
     })))
+    setPercentages((prev) => {
+      const next = { ...prev }
+      delete next[name]
+      return next
+    })
+    if (paidBy === name) setPaidBy('')
   }
 
   const toggleAssign = (itemId: string, person: string) => {
@@ -60,17 +83,28 @@ export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id))
 
+  const percentageTotal = participants.reduce((sum, p) => sum + (percentages[p] ?? 0), 0)
+  const percentageValid = Math.abs(percentageTotal - 100) < 0.01
+
   const receiptData: Omit<Receipt, 'id'> = {
     title: title || 'Receipt',
     items,
     tax: parseFloat(tax) || 0,
     serviceCharge: parseFloat(serviceCharge) || 0,
+    discount: parseFloat(discount) || 0,
     participants,
     splitMode,
-    date: new Date().toISOString().split('T')[0],
+    percentages,
+    paidBy,
+    category,
+    settledBy: initialData?.settledBy ?? [],
+    date: initialData?.date ?? new Date().toISOString().split('T')[0],
   }
 
-  const canProceed = items.length > 0 && participants.length > 0
+  const canProceed =
+    items.length > 0 &&
+    participants.length > 0 &&
+    (splitMode !== 'percentage' || percentageValid)
 
   if (step === 'summary') {
     return (
@@ -78,7 +112,9 @@ export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
         <SplitSummary receipt={receiptData} />
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => setStep('setup')} className="flex-1">Back</Button>
-          <Button onClick={() => onSave(receiptData)} className="flex-1">Save Receipt</Button>
+          <Button onClick={() => onSave(receiptData)} className="flex-1">
+            {initialData ? 'Update Receipt' : 'Save Receipt'}
+          </Button>
         </div>
       </div>
     )
@@ -86,39 +122,58 @@ export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
 
   return (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-      <div>
-        <Label htmlFor="title">Receipt Title</Label>
-        <Input id="title" placeholder="e.g. Dinner at KLCC" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor="title">Receipt Title</Label>
+          <Input id="title" placeholder="e.g. Dinner at KLCC" value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <Select id="category" value={category} onChange={(e) => setCategory(e.target.value as ReceiptCategory)}>
+            {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </Select>
+        </div>
       </div>
 
       {/* Items */}
       <div>
         <Label>Items</Label>
         <div className="space-y-2 mb-2">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between bg-[#222831] rounded-xl px-3 py-2">
-              <span className="text-[#EEEEEE] text-sm">{item.name}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-[#00ADB5] text-sm">{formatCurrency(item.price)}</span>
-                <button onClick={() => removeItem(item.id)} className="text-[#EEEEEE]/30 hover:text-red-400 cursor-pointer">
-                  <X size={13} />
-                </button>
+          {items.map((item) => {
+            const qty = item.quantity ?? 1
+            const total = item.price * qty
+            return (
+              <div key={item.id} className="flex items-center justify-between bg-[#222831] rounded-xl px-3 py-2">
+                <div>
+                  <span className="text-[#EEEEEE] text-sm">{item.name}</span>
+                  {qty > 1 && <span className="text-[#EEEEEE]/40 text-xs ml-2">{qty}×</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#00ADB5] text-sm">{formatCurrency(total)}</span>
+                  <button onClick={() => removeItem(item.id)} className="text-[#EEEEEE]/30 hover:text-red-400 cursor-pointer">
+                    <X size={13} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
         <ItemForm onAdd={(item) => setItems((prev) => [...prev, item])} />
       </div>
 
-      {/* Tax & service */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Tax, service, discount */}
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <Label htmlFor="tax">Tax (%)</Label>
           <Input id="tax" type="number" min="0" step="0.5" value={tax} onChange={(e) => setTax(e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="service">Service Charge (%)</Label>
+          <Label htmlFor="service">Service (%)</Label>
           <Input id="service" type="number" min="0" step="0.5" value={serviceCharge} onChange={(e) => setServiceCharge(e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="discount">Discount (RM)</Label>
+          <Input id="discount" type="number" min="0" step="0.50" value={discount} onChange={(e) => setDiscount(e.target.value)} />
         </div>
       </div>
 
@@ -154,17 +209,34 @@ export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
         )}
       </div>
 
+      {/* Paid by */}
+      {participants.length > 0 && (
+        <div>
+          <Label htmlFor="paidBy">Paid by</Label>
+          <Select id="paidBy" value={paidBy} onChange={(e) => setPaidBy(e.target.value)}>
+            <option value="">Select who paid...</option>
+            {participants.map((p) => <option key={p} value={p}>{p}</option>)}
+          </Select>
+        </div>
+      )}
+
       {/* Split mode */}
       <div>
         <Label>Split Method</Label>
         <Tabs tabs={splitTabs} active={splitMode} onChange={(v) => setSplitMode(v as SplitMode)} />
       </div>
 
-      {/* Itemized assignment */}
       {splitMode === 'itemized' && participants.length > 0 && (
         <div>
           <Label>Assign Items</Label>
           <AssignPeople items={items} participants={participants} onToggle={toggleAssign} />
+        </div>
+      )}
+
+      {splitMode === 'percentage' && participants.length > 0 && (
+        <div>
+          <Label>Set Percentages</Label>
+          <PercentageSplit participants={participants} percentages={percentages} onChange={setPercentages} />
         </div>
       )}
 
@@ -176,7 +248,9 @@ export function ReceiptForm({ onSave, onCancel }: ReceiptFormProps) {
           disabled={!canProceed}
           className="flex-1"
         >
-          Calculate Split
+          {splitMode === 'percentage' && !percentageValid && participants.length > 0
+            ? `${percentageTotal.toFixed(0)}% / 100%`
+            : 'Preview Split'}
         </Button>
       </div>
     </div>
