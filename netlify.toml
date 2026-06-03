@@ -1,0 +1,12 @@
+[build]
+  command = "yarn build"
+  publish = "dist"
+
+# Service workers can't use env vars — Firebase config must be hardcoded there
+[build.environment]
+  SECRETS_SCAN_OMIT_PATHS = "public/firebase-messaging-sw.js,.firebaserc"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
