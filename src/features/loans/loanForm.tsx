@@ -19,6 +19,7 @@ interface LoanFormProps {
 export function LoanForm({ onSubmit, onCancel }: LoanFormProps) {
   const { friends } = useFriends()
   const [person, setPerson] = useState('')
+  const [useCustomPerson, setUseCustomPerson] = useState(false)
   const [amount, setAmount] = useState('')
   const [type, setType] = useState<LoanType>('lent')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -38,9 +39,17 @@ export function LoanForm({ onSubmit, onCancel }: LoanFormProps) {
         {friends.length > 0 ? (
           <Select
             id="person"
-            value={person}
-            onChange={(e) => setPerson(e.target.value)}
-            required
+            value={useCustomPerson ? '__custom' : person}
+            onChange={(e) => {
+              if (e.target.value === '__custom') {
+                setUseCustomPerson(true)
+                setPerson('')
+              } else {
+                setUseCustomPerson(false)
+                setPerson(e.target.value)
+              }
+            }}
+            required={!useCustomPerson}
           >
             <option value="">Select a friend</option>
             {friends.map((f) => (
@@ -49,11 +58,11 @@ export function LoanForm({ onSubmit, onCancel }: LoanFormProps) {
             <option value="__custom">Other (type below)</option>
           </Select>
         ) : null}
-        {(friends.length === 0 || person === '__custom') && (
+        {(friends.length === 0 || useCustomPerson) && (
           <Input
             id="person-custom"
             placeholder="Name"
-            value={person === '__custom' ? '' : person}
+            value={person}
             onChange={(e) => setPerson(e.target.value)}
             className="mt-2"
             required
