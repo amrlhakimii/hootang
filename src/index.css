@@ -46,3 +46,8 @@ input, select, textarea {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #393E46; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #00ADB5; }
+
+@keyframes coinSpin {
+  0%   { transform: perspective(120px) rotateY(0deg); }
+  100% { transform: perspective(120px) rotateY(360deg); }
+}
