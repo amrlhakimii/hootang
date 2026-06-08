@@ -1,4 +1,5 @@
 import { UserMenu } from '../../features/auth/UserMenu'
+import { CreditBadge } from './creditBadge'
 
 export function TopHeader() {
   return (
@@ -22,6 +23,7 @@ export function TopHeader() {
       </span>
 
       <div className="flex items-center gap-3">
+        <CreditBadge />
         <span className="text-[10px] text-[#EEEEEE]/25 tracking-widest uppercase hidden sm:block">
           Track · Split · Settle
         </span>

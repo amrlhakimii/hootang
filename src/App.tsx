@@ -4,7 +4,6 @@ import { useAuth } from './context/AuthContext'
 import { TopHeader } from './components/ui/mobileHeader'
 import { FloatingNav } from './components/ui/floatingNav'
 import { FloatingBackground } from './components/ui/floatingBackground'
-import { CreditBadge } from './components/ui/creditBadge'
 import { AppRoutes } from './routes/appRoutes'
 import { LoginPage } from './features/auth/LoginPage'
 import { usePushNotifications } from './hooks/usePushNotifications'
@@ -33,7 +32,6 @@ function AppContent() {
         </main>
       </div>
       <FloatingNav />
-      <CreditBadge />
     </BrowserRouter>
   )
 }
