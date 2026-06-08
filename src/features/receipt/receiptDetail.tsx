@@ -1,8 +1,10 @@
-import { Check, FileDown, Pencil, Share2 } from 'lucide-react'
+import { Check, FileDown, Loader2, Pencil, Share2 } from 'lucide-react'
+import { useState } from 'react'
 import { type Receipt } from '../../types/receipt'
 import { calculateReceiptSplit } from '../../utils/calculateSplit'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { generateReceiptPDF } from '../../utils/generateReceiptPDF'
+import { generateReceiptPDFBlob } from '../../utils/generateReceiptPDFBlob'
 import { shareWhatsApp } from '../../utils/shareWhatsApp'
 import { Button } from '../../components/layout/button'
 
@@ -26,6 +28,7 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
   const serviceAmt = subtotal * (receipt.serviceCharge / 100)
   const grandTotal = subtotal + taxAmt + serviceAmt
   const settledBy = receipt.settledBy ?? []
+  const [sharing, setSharing] = useState(false)
 
   const toggleSettle = (name: string) => {
     const newSettledBy = settledBy.includes(name)
@@ -34,7 +37,21 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
     onUpdate({ ...receipt, settledBy: newSettledBy })
   }
 
-  const handleShare = () => {
+  const handleShare = async () => {
+    setSharing(true)
+    try {
+      const blob = await generateReceiptPDFBlob(receipt)
+      const safeName = receipt.title.replace(/[^a-z0-9]/gi, '_')
+      const file = new File([blob], `${safeName}.pdf`, { type: 'application/pdf' })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] })
+        return
+      }
+    } catch {
+      // fall through to text share
+    } finally {
+      setSharing(false)
+    }
     const lines = [
       `🧾 *${receipt.title}*`,
       receipt.paidBy ? `Paid by: *${receipt.paidBy}*` : '',
@@ -54,8 +71,9 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
         <Button variant="secondary" size="sm" onClick={onEdit}>
           <Pencil size={14} /> Edit
         </Button>
-        <Button variant="secondary" size="sm" onClick={handleShare}>
-          <Share2 size={14} /> Share
+        <Button variant="secondary" size="sm" onClick={handleShare} disabled={sharing}>
+          {sharing ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
+          {sharing ? 'Generating…' : 'Share'}
         </Button>
         <Button variant="secondary" size="sm" onClick={() => generateReceiptPDF(receipt)}>
           <FileDown size={14} /> PDF
