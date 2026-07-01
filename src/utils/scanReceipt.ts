@@ -8,7 +8,7 @@ export interface ScannedReceipt {
 
 export async function scanReceipt(imageBase64: string, mimeType: string): Promise<ScannedReceipt> {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`
 
   const prompt = `You are a receipt scanner. Extract data from this receipt image and return ONLY valid JSON with no markdown or explanation:
 {
