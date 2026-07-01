@@ -27,7 +27,7 @@ Rules: price is the unit price (not total), quantity defaults to 1, all numbers 
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-exp:free',
+      model: 'google/gemma-4-26b-a4b-it:free',
       messages: [
         {
           role: 'user',
