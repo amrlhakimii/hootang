@@ -7,8 +7,7 @@ export interface ScannedReceipt {
 }
 
 export async function scanReceipt(imageBase64: string, mimeType: string): Promise<ScannedReceipt> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent`
+  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
 
   const prompt = `You are a receipt scanner. Extract data from this receipt image and return ONLY valid JSON with no markdown or explanation:
 {
@@ -20,30 +19,37 @@ export async function scanReceipt(imageBase64: string, mimeType: string): Promis
 }
 Rules: price is the unit price (not total), quantity defaults to 1, all numbers must be valid JSON numbers not strings.`
 
-  const response = await fetch(url, {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      contents: [{ parts: [
-        { text: prompt },
-        { inline_data: { mime_type: mimeType, data: imageBase64 } },
-      ]}],
-      generationConfig: { response_mime_type: 'application/json' },
+      model: 'google/gemini-2.0-flash-exp:free',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
+          ],
+        },
+      ],
     }),
   })
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}))
-    throw new Error(err?.error?.message ?? 'Failed to scan receipt')
+    throw new Error(err?.error?.message ?? `Request failed: ${response.status}`)
   }
 
   const data = await response.json()
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!text) throw new Error('No response from Gemini')
-  return JSON.parse(text)
+  const text = data.choices?.[0]?.message?.content
+  if (!text) throw new Error('No response from model')
+
+  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+  return JSON.parse(cleaned)
 }
 
 export function fileToBase64(file: File): Promise<string> {
