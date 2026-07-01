@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Camera, X } from 'lucide-react'
 import { Input, Select, Label } from '../../components/layout/input'
 import { Button } from '../../components/layout/button'
 import { Tabs } from '../../components/layout/tabs'
@@ -10,6 +10,8 @@ import { SplitSummary } from './splitSummary'
 import { type Receipt, type ReceiptItem, type SplitMode, type ReceiptCategory } from '../../types/receipt'
 import { useFriends } from '../../hooks/useFriends'
 import { formatCurrency } from '../../utils/formatCurrency'
+import { scanReceipt, fileToBase64 } from '../../utils/scanReceipt'
+import { generateID } from '../../utils/generateID'
 
 interface ReceiptFormProps {
   onSave: (data: Omit<Receipt, 'id'>) => void
@@ -47,6 +49,38 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
   const [category, setCategory] = useState<ReceiptCategory>(initialData?.category ?? 'food')
   const [customName, setCustomName] = useState('')
   const [step, setStep] = useState<'setup' | 'summary'>('setup')
+  const [scanning, setScanning] = useState(false)
+  const [scanError, setScanError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setScanError('')
+    setScanning(true)
+    try {
+      const base64 = await fileToBase64(file)
+      const result = await scanReceipt(base64, file.type)
+      if (result.title) setTitle(result.title)
+      if (result.items?.length) {
+        setItems(result.items.map((item) => ({
+          id: generateID(),
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity || 1,
+          assignedTo: [],
+        })))
+      }
+      if (result.tax) setTax(String(result.tax))
+      if (result.serviceCharge) setServiceCharge(String(result.serviceCharge))
+      if (result.discount) setDiscount(String(result.discount))
+    } catch {
+      setScanError('Could not read receipt. Try a clearer photo.')
+    } finally {
+      setScanning(false)
+      e.target.value = ''
+    }
+  }
 
   const addParticipant = (name: string) => {
     if (name && !participants.includes(name)) setParticipants((p) => [...p, name])
@@ -122,6 +156,26 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
 
   return (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleScan}
+      />
+      <Button
+        type="button"
+        variant="secondary"
+        className="w-full flex items-center justify-center gap-2"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={scanning}
+      >
+        <Camera size={14} />
+        {scanning ? 'Scanning...' : 'Scan Receipt'}
+      </Button>
+      {scanError && <p className="text-red-400 text-xs text-center">{scanError}</p>}
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label htmlFor="title">Receipt Title</Label>
