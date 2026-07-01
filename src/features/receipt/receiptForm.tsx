@@ -74,8 +74,10 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
       if (result.tax) setTax(String(result.tax))
       if (result.serviceCharge) setServiceCharge(String(result.serviceCharge))
       if (result.discount) setDiscount(String(result.discount))
-    } catch {
-      setScanError('Could not read receipt. Try a clearer photo.')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('Scan error:', msg)
+      setScanError(msg)
     } finally {
       setScanning(false)
       e.target.value = ''
