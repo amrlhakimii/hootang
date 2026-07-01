@@ -8,6 +8,7 @@ export interface ScannedReceipt {
 
 export async function scanReceipt(imageBase64: string, mimeType: string): Promise<ScannedReceipt> {
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+  if (!apiKey) throw new Error('VITE_OPENROUTER_API_KEY is not set')
 
   const prompt = `You are a receipt scanner. Extract data from this receipt image and return ONLY valid JSON with no markdown or explanation:
 {
