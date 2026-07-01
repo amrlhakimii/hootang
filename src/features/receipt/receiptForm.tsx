@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Camera, X } from 'lucide-react'
+import { Camera, Check, X } from 'lucide-react'
 import { Input, Select, Label } from '../../components/layout/input'
 import { Button } from '../../components/layout/button'
 import { Tabs } from '../../components/layout/tabs'
@@ -52,6 +52,26 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
   const [scanning, setScanning] = useState(false)
   const [scanError, setScanError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editDraft, setEditDraft] = useState({ name: '', price: '', quantity: '' })
+
+  const startEdit = (item: ReceiptItem) => {
+    setEditingId(item.id)
+    setEditDraft({ name: item.name, price: String(item.price), quantity: String(item.quantity ?? 1) })
+  }
+
+  const commitEdit = () => {
+    if (!editingId) return
+    setItems((prev) => prev.map((item) =>
+      item.id !== editingId ? item : {
+        ...item,
+        name: editDraft.name.trim() || item.name,
+        price: parseFloat(editDraft.price) || item.price,
+        quantity: Math.max(1, parseInt(editDraft.quantity) || 1),
+      }
+    ))
+    setEditingId(null)
+  }
 
   const handleScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -198,15 +218,59 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
           {items.map((item) => {
             const qty = item.quantity ?? 1
             const total = item.price * qty
+
+            if (editingId === item.id) {
+              return (
+                <div key={item.id} className="flex items-center gap-2 bg-[#222831] rounded-xl px-3 py-2">
+                  <Input
+                    className="flex-1 h-7 text-sm"
+                    value={editDraft.name}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') commitEdit() }}
+                    autoFocus
+                  />
+                  <Input
+                    className="w-12 h-7 text-sm"
+                    type="number"
+                    min="1"
+                    value={editDraft.quantity}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, quantity: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') commitEdit() }}
+                    placeholder="Qty"
+                  />
+                  <Input
+                    className="w-24 h-7 text-sm"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={editDraft.price}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, price: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') commitEdit() }}
+                    placeholder="Price"
+                  />
+                  <button onClick={commitEdit} className="text-[#00ADB5] hover:text-[#00ADB5]/70 cursor-pointer">
+                    <Check size={14} />
+                  </button>
+                  <button onClick={() => setEditingId(null)} className="text-[#EEEEEE]/30 hover:text-red-400 cursor-pointer">
+                    <X size={13} />
+                  </button>
+                </div>
+              )
+            }
+
             return (
-              <div key={item.id} className="flex items-center justify-between bg-[#222831] rounded-xl px-3 py-2">
+              <div
+                key={item.id}
+                className="flex items-center justify-between bg-[#222831] rounded-xl px-3 py-2 cursor-pointer"
+                onClick={() => startEdit(item)}
+              >
                 <div>
                   <span className="text-[#EEEEEE] text-sm">{item.name}</span>
                   {qty > 1 && <span className="text-[#EEEEEE]/40 text-xs ml-2">{qty}×</span>}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[#00ADB5] text-sm">{formatCurrency(total)}</span>
-                  <button onClick={() => removeItem(item.id)} className="text-[#EEEEEE]/30 hover:text-red-400 cursor-pointer">
+                  <button onClick={(e) => { e.stopPropagation(); removeItem(item.id) }} className="text-[#EEEEEE]/30 hover:text-red-400 cursor-pointer">
                     <X size={13} />
                   </button>
                 </div>
