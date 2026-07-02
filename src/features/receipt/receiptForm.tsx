@@ -182,7 +182,6 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleScan}
       />
