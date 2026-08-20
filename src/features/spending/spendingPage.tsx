@@ -1,5 +1,5 @@
 import { useMemo, useRef, useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Wallet, CalendarDays, TrendingUp, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Wallet, CalendarDays, TrendingUp, Plus, Trash2, Pencil } from 'lucide-react'
 import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
@@ -11,9 +11,14 @@ import { useBills } from '../../hooks/useBills'
 import { useSubscriptions } from '../../hooks/useSubscription'
 import { useReceipts } from '../../hooks/useReceipt'
 import { useSpendings } from '../../hooks/useSpending'
+import { type Spending } from '../../types/spending'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
 import { getCurrentMonth, formatMonth } from '../../utils/formatDate'
+import { getCostPerPerson } from '../../utils/calculateSubscription'
+import { calculateReceiptSplit } from '../../utils/calculateSplit'
+
+const ME = 'kimi'
 
 const categoryColors: Record<string, string> = {
   rent: '#8b5cf6',
@@ -88,8 +93,9 @@ export function SpendingPage() {
   const { bills } = useBills()
   const { subscriptions } = useSubscriptions()
   const { receipts } = useReceipts()
-  const { spendings, addSpending, deleteSpending } = useSpendings()
+  const { spendings, addSpending, updateSpending, deleteSpending } = useSpendings()
   const [month, setMonth] = useState(getCurrentMonth())
+  const [editingSpending, setEditingSpending] = useState<Spending | null>(null)
   const [showModal, setShowModal] = useState(false)
   const statsRef = useRef<HTMLDivElement>(null)
 
@@ -125,22 +131,26 @@ export function SpendingPage() {
           if (s.billingCycle === 'yearly') return start.getMonth() === mon - 1
           return true
         })
-        .map((s) => ({ id: s.id, source: 'subscription', category: 'subscription', description: s.name, amount: s.totalAmount, date: `${monthKey}-01` }))
+        .map((s) => ({ id: s.id, source: 'subscription', category: 'subscription', description: s.name, amount: getCostPerPerson(s), date: `${monthKey}-01` }))
 
       const receiptItems: SpendItem[] = receipts
         .filter((r) => {
           if (!r.date) return false
           const d = new Date(r.date)
-          return d.getFullYear() === year && d.getMonth() === mon - 1
+          if (d.getFullYear() !== year || d.getMonth() !== mon - 1) return false
+          return r.participants.some((p) => p.trim().toLowerCase() === ME)
         })
-        .map((r) => ({
-          id: r.id,
-          source: 'receipt',
-          category: r.category,
-          description: r.title,
-          amount: r.items.reduce((sum, i) => sum + i.price, 0) * (1 + r.tax / 100 + r.serviceCharge / 100),
-          date: r.date,
-        }))
+        .map((r) => {
+          const share = calculateReceiptSplit(r).find((s) => s.name.trim().toLowerCase() === ME)
+          return {
+            id: r.id,
+            source: 'receipt',
+            category: r.category,
+            description: r.title,
+            amount: share?.total ?? 0,
+            date: r.date,
+          }
+        })
 
       const manualItems: SpendItem[] = spendings
         .filter((s) => monthKeyOf(s.date) === monthKey)
@@ -193,7 +203,7 @@ export function SpendingPage() {
 
   return (
     <PageContainer>
-      <Navbar title="Spending" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Spending</Button>} />
+      <Navbar title="Spending" action={<Button onClick={() => { setEditingSpending(null); setShowModal(true) }}><Plus size={15} /> Add Spending</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Every ringgit, tracked. Today, this week, this month.</p>
 
       <div ref={statsRef} className="grid grid-cols-3 gap-3 mb-6">
@@ -294,9 +304,20 @@ export function SpendingPage() {
                       </div>
                       <p className="font-bold text-sm shrink-0 text-red-400">{formatCurrency(item.amount)}</p>
                       {item.source === 'manual' && (
-                        <button onClick={() => deleteSpending(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer shrink-0">
-                          <Trash2 size={14} />
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => {
+                              const original = spendings.find((s) => s.id === item.id)
+                              if (original) { setEditingSpending(original); setShowModal(true) }
+                            }}
+                            className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button onClick={() => deleteSpending(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       )}
                     </div>
                   )
@@ -307,8 +328,21 @@ export function SpendingPage() {
         </>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Add Spending">
-        <SpendingForm onSubmit={(data) => { addSpending(data); setShowModal(false) }} onCancel={() => setShowModal(false)} />
+      <Modal
+        isOpen={showModal}
+        onClose={() => { setShowModal(false); setEditingSpending(null) }}
+        title={editingSpending ? 'Edit Spending' : 'Add Spending'}
+      >
+        <SpendingForm
+          initial={editingSpending ?? undefined}
+          onSubmit={(data) => {
+            if (editingSpending) updateSpending(editingSpending.id, data)
+            else addSpending(data)
+            setShowModal(false)
+            setEditingSpending(null)
+          }}
+          onCancel={() => { setShowModal(false); setEditingSpending(null) }}
+        />
       </Modal>
     </PageContainer>
   )

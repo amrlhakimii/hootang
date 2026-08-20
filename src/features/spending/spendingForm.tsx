@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Input, Select, Label } from '../../components/layout/input'
 import { Button } from '../../components/layout/button'
-import { type SpendingCategory, type PaymentMethod, type ShopeePayMethod } from '../../types/spending'
+import { type Spending, type SpendingCategory, type PaymentMethod, type ShopeePayMethod } from '../../types/spending'
 
 interface SpendingFormProps {
+  initial?: Spending
   onSubmit: (data: {
     description: string
     amount: number
@@ -47,13 +48,13 @@ function today(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function SpendingForm({ onSubmit, onCancel }: SpendingFormProps) {
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState<SpendingCategory>('food')
-  const [date, setDate] = useState(today())
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
-  const [shopeeMethod, setShopeeMethod] = useState<ShopeePayMethod>('wallet')
+export function SpendingForm({ initial, onSubmit, onCancel }: SpendingFormProps) {
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [amount, setAmount] = useState(initial ? String(initial.amount) : '')
+  const [category, setCategory] = useState<SpendingCategory>(initial?.category ?? 'food')
+  const [date, setDate] = useState(initial?.date ?? today())
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initial?.paymentMethod ?? 'cash')
+  const [shopeeMethod, setShopeeMethod] = useState<ShopeePayMethod>(initial?.shopeeMethod ?? 'wallet')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -117,7 +118,7 @@ export function SpendingForm({ onSubmit, onCancel }: SpendingFormProps) {
 
       <div className="flex gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>
-        <Button type="submit" className="flex-1">Add Spending</Button>
+        <Button type="submit" className="flex-1">{initial ? 'Save Changes' : 'Add Spending'}</Button>
       </div>
     </form>
   )

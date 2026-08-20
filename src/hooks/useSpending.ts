@@ -10,9 +10,13 @@ export function useSpendings() {
     setSpendings((prev) => [spending, ...prev])
   }
 
+  const updateSpending = (id: string, data: Omit<Spending, 'id'>) => {
+    setSpendings((prev) => prev.map((s) => (s.id === id ? { ...data, id } : s)))
+  }
+
   const deleteSpending = (id: string) => {
     setSpendings((prev) => prev.filter((s) => s.id !== id))
   }
 
-  return { spendings, addSpending, deleteSpending }
+  return { spendings, addSpending, updateSpending, deleteSpending }
 }
