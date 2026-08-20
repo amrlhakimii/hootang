@@ -9,6 +9,7 @@ import { Tabs } from '../../components/layout/tabs'
 import { BillForm } from './billForm'
 import { BillTable } from './billTable'
 import { useBills } from '../../hooks/useBills'
+import { type Bill } from '../../types/bill'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 const tabs = [
@@ -30,8 +31,9 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
 }
 
 export function BillPage() {
-  const { bills, addBill, updateStatus, deleteBill, pendingBills } = useBills()
+  const { bills, addBill, updateStatus, updateBill, deleteBill, pendingBills } = useBills()
   const [showModal, setShowModal] = useState(false)
+  const [editingBill, setEditingBill] = useState<Bill | null>(null)
   const [activeTab, setActiveTab] = useState('all')
   const statsRef = useRef<HTMLDivElement>(null)
 
@@ -56,7 +58,7 @@ export function BillPage() {
 
   return (
     <PageContainer>
-      <Navbar title="Bill Tracker" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Bill</Button>} />
+      <Navbar title="Bill Tracker" action={<Button onClick={() => { setEditingBill(null); setShowModal(true) }}><Plus size={15} /> Add Bill</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Stay on top of what's due.</p>
 
       <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -76,12 +78,26 @@ export function BillPage() {
           bills={filtered}
           onPay={(id) => updateStatus(id, 'paid')}
           onUnpay={(id) => updateStatus(id, 'pending')}
+          onEdit={(bill) => { setEditingBill(bill); setShowModal(true) }}
           onDelete={deleteBill}
         />
       </div>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Add Bill">
-        <BillForm onSubmit={(data) => { addBill(data); setShowModal(false) }} onCancel={() => setShowModal(false)} />
+      <Modal
+        isOpen={showModal}
+        onClose={() => { setShowModal(false); setEditingBill(null) }}
+        title={editingBill ? 'Edit Bill' : 'Add Bill'}
+      >
+        <BillForm
+          initial={editingBill ?? undefined}
+          onSubmit={(data) => {
+            if (editingBill) updateBill(editingBill.id, data)
+            else addBill(data)
+            setShowModal(false)
+            setEditingBill(null)
+          }}
+          onCancel={() => { setShowModal(false); setEditingBill(null) }}
+        />
       </Modal>
     </PageContainer>
   )

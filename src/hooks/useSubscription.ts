@@ -10,6 +10,10 @@ export function useSubscriptions() {
     setSubscriptions((prev) => [sub, ...prev])
   }
 
+  const updateSubscription = (id: string, data: Omit<Subscription, 'id'>) => {
+    setSubscriptions((prev) => prev.map((s) => (s.id === id ? { ...data, id } : s)))
+  }
+
   const deleteSubscription = (id: string) => {
     setSubscriptions((prev) => prev.filter((s) => s.id !== id))
   }
@@ -38,5 +42,5 @@ export function useSubscriptions() {
     )
   }
 
-  return { subscriptions, addSubscription, deleteSubscription, togglePayment }
+  return { subscriptions, addSubscription, updateSubscription, deleteSubscription, togglePayment }
 }

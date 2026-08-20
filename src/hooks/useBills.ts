@@ -48,11 +48,15 @@ export function useBills() {
     setBills((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)))
   }
 
+  const updateBill = (id: string, data: Omit<Bill, 'id' | 'status'>) => {
+    setBills((prev) => prev.map((b) => (b.id === id ? { ...data, id, status: b.status } : b)))
+  }
+
   const deleteBill = (id: string) => {
     setBills((prev) => prev.filter((b) => b.id !== id))
   }
 
   const pendingBills = bills.filter((b) => b.status === 'pending')
 
-  return { bills, addBill, updateStatus, deleteBill, pendingBills }
+  return { bills, addBill, updateStatus, updateBill, deleteBill, pendingBills }
 }

@@ -9,6 +9,7 @@ import { EmptyState } from '../../components/layout/emptyState'
 import { SubscriptionCard } from './subscriptionCard'
 import { SubscriptionForm } from './subscriptionForm'
 import { useSubscriptions } from '../../hooks/useSubscription'
+import { type Subscription } from '../../types/subscription'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 function StatCard({ label, value, color, icon }: { label: string; value: string; color: string; icon: React.ReactNode }) {
@@ -24,8 +25,9 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
 }
 
 export function SubscriptionPage() {
-  const { subscriptions, addSubscription, deleteSubscription, togglePayment } = useSubscriptions()
+  const { subscriptions, addSubscription, updateSubscription, deleteSubscription, togglePayment } = useSubscriptions()
   const [showModal, setShowModal] = useState(false)
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
   const statsRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
   const hasAnimatedCards = useRef(false)
@@ -54,7 +56,7 @@ export function SubscriptionPage() {
 
   return (
     <PageContainer>
-      <Navbar title="Subscriptions" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Subscription</Button>} />
+      <Navbar title="Subscriptions" action={<Button onClick={() => { setEditingSubscription(null); setShowModal(true) }}><Plus size={15} /> Add Subscription</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Split your streaming costs with the crew.</p>
 
       <div ref={statsRef} className="grid grid-cols-2 gap-3 mb-6">
@@ -67,13 +69,32 @@ export function SubscriptionPage() {
       ) : (
         <div ref={cardsRef} className="space-y-3">
           {subscriptions.map((sub) => (
-            <SubscriptionCard key={sub.id} subscription={sub} onDelete={deleteSubscription} onToggle={togglePayment} />
+            <SubscriptionCard
+              key={sub.id}
+              subscription={sub}
+              onEdit={(s) => { setEditingSubscription(s); setShowModal(true) }}
+              onDelete={deleteSubscription}
+              onToggle={togglePayment}
+            />
           ))}
         </div>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Add Subscription">
-        <SubscriptionForm onSubmit={(data) => { addSubscription(data); setShowModal(false) }} onCancel={() => setShowModal(false)} />
+      <Modal
+        isOpen={showModal}
+        onClose={() => { setShowModal(false); setEditingSubscription(null) }}
+        title={editingSubscription ? 'Edit Subscription' : 'Add Subscription'}
+      >
+        <SubscriptionForm
+          initial={editingSubscription ?? undefined}
+          onSubmit={(data) => {
+            if (editingSubscription) updateSubscription(editingSubscription.id, data)
+            else addSubscription(data)
+            setShowModal(false)
+            setEditingSubscription(null)
+          }}
+          onCancel={() => { setShowModal(false); setEditingSubscription(null) }}
+        />
       </Modal>
     </PageContainer>
   )

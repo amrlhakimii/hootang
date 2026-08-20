@@ -1,5 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Wallet, CalendarDays, TrendingUp, Plus, Trash2, Pencil } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, Wallet, CalendarDays, TrendingUp, Plus, Trash2, Pencil, ExternalLink } from 'lucide-react'
 import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
@@ -7,18 +8,21 @@ import { Button } from '../../components/layout/button'
 import { Modal } from '../../components/layout/modal'
 import { EmptyState } from '../../components/layout/emptyState'
 import { SpendingForm } from './spendingForm'
+import { BillForm } from '../bills/billForm'
+import { SubscriptionForm } from '../subscriptions/subscriptionForm'
 import { useBills } from '../../hooks/useBills'
 import { useSubscriptions } from '../../hooks/useSubscription'
 import { useReceipts } from '../../hooks/useReceipt'
 import { useSpendings } from '../../hooks/useSpending'
+import { useAuth } from '../../context/AuthContext'
 import { type Spending } from '../../types/spending'
+import { type Bill } from '../../types/bill'
+import { type Subscription } from '../../types/subscription'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
 import { getCurrentMonth, formatMonth } from '../../utils/formatDate'
 import { getCostPerPerson } from '../../utils/calculateSubscription'
 import { calculateReceiptSplit } from '../../utils/calculateSplit'
-
-const ME = 'kimi'
 
 const categoryColors: Record<string, string> = {
   rent: '#8b5cf6',
@@ -90,12 +94,17 @@ interface SpendItem {
 }
 
 export function SpendingPage() {
-  const { bills } = useBills()
-  const { subscriptions } = useSubscriptions()
-  const { receipts } = useReceipts()
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const ME = (user?.displayName ?? '').trim().toLowerCase()
+  const { bills, updateBill, deleteBill } = useBills()
+  const { subscriptions, updateSubscription, deleteSubscription } = useSubscriptions()
+  const { receipts, deleteReceipt } = useReceipts()
   const { spendings, addSpending, updateSpending, deleteSpending } = useSpendings()
   const [month, setMonth] = useState(getCurrentMonth())
   const [editingSpending, setEditingSpending] = useState<Spending | null>(null)
+  const [editingBill, setEditingBill] = useState<Bill | null>(null)
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
   const [showModal, setShowModal] = useState(false)
   const statsRef = useRef<HTMLDivElement>(null)
 
@@ -158,8 +167,8 @@ export function SpendingPage() {
 
       return [...billItems, ...subItems, ...receiptItems, ...manualItems]
     }
-     
-  }, [bills, subscriptions, receipts, spendings])
+
+  }, [bills, subscriptions, receipts, spendings, ME])
 
   const now = new Date()
   const todayStr = toDateKey(now)
@@ -303,22 +312,66 @@ export function SpendingPage() {
                         </div>
                       </div>
                       <p className="font-bold text-sm shrink-0 text-red-400">{formatCurrency(item.amount)}</p>
-                      {item.source === 'manual' && (
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => {
-                              const original = spendings.find((s) => s.id === item.id)
-                              if (original) { setEditingSpending(original); setShowModal(true) }
-                            }}
-                            className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                          <button onClick={() => deleteSpending(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {item.source === 'manual' && (
+                          <>
+                            <button
+                              onClick={() => {
+                                const original = spendings.find((s) => s.id === item.id)
+                                if (original) { setEditingSpending(original); setShowModal(true) }
+                              }}
+                              className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => deleteSpending(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
+                        {item.source === 'bill' && (
+                          <>
+                            <button
+                              onClick={() => {
+                                const original = bills.find((b) => b.id === item.id)
+                                if (original) setEditingBill(original)
+                              }}
+                              className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => deleteBill(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
+                        {item.source === 'subscription' && (
+                          <>
+                            <button
+                              onClick={() => {
+                                const original = subscriptions.find((s) => s.id === item.id)
+                                if (original) setEditingSubscription(original)
+                              }}
+                              className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => deleteSubscription(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
+                        {item.source === 'receipt' && (
+                          <>
+                            <button onClick={() => navigate('/receipt')} className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer">
+                              <ExternalLink size={14} />
+                            </button>
+                            <button onClick={() => deleteReceipt(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   )
                 })}
@@ -343,6 +396,26 @@ export function SpendingPage() {
           }}
           onCancel={() => { setShowModal(false); setEditingSpending(null) }}
         />
+      </Modal>
+
+      <Modal isOpen={editingBill !== null} onClose={() => setEditingBill(null)} title="Edit Bill">
+        {editingBill && (
+          <BillForm
+            initial={editingBill}
+            onSubmit={(data) => { updateBill(editingBill.id, data); setEditingBill(null) }}
+            onCancel={() => setEditingBill(null)}
+          />
+        )}
+      </Modal>
+
+      <Modal isOpen={editingSubscription !== null} onClose={() => setEditingSubscription(null)} title="Edit Subscription">
+        {editingSubscription && (
+          <SubscriptionForm
+            initial={editingSubscription}
+            onSubmit={(data) => { updateSubscription(editingSubscription.id, data); setEditingSubscription(null) }}
+            onCancel={() => setEditingSubscription(null)}
+          />
+        )}
       </Modal>
     </PageContainer>
   )

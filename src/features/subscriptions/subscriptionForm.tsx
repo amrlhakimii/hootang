@@ -7,17 +7,18 @@ import { useFriends } from '../../hooks/useFriends'
 import { generateID } from '../../utils/generateID'
 
 interface SubscriptionFormProps {
+  initial?: Subscription
   onSubmit: (data: Omit<Subscription, 'id'>) => void
   onCancel: () => void
 }
 
-export function SubscriptionForm({ onSubmit, onCancel }: SubscriptionFormProps) {
+export function SubscriptionForm({ initial, onSubmit, onCancel }: SubscriptionFormProps) {
   const { friends } = useFriends()
-  const [name, setName] = useState('')
-  const [totalAmount, setTotalAmount] = useState('')
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
-  const [participants, setParticipants] = useState<string[]>([])
+  const [name, setName] = useState(initial?.name ?? '')
+  const [totalAmount, setTotalAmount] = useState(initial ? String(initial.totalAmount) : '')
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>(initial?.billingCycle ?? 'monthly')
+  const [startDate, setStartDate] = useState(initial?.startDate ?? new Date().toISOString().split('T')[0])
+  const [participants, setParticipants] = useState<string[]>(initial?.participants.map((p) => p.name) ?? [])
   const [customName, setCustomName] = useState('')
 
   const addParticipant = (name: string) => {
@@ -34,11 +35,14 @@ export function SubscriptionForm({ onSubmit, onCancel }: SubscriptionFormProps) 
     e.preventDefault()
     if (!name.trim() || !totalAmount || participants.length === 0) return
 
-    const subParticipants: SubscriptionParticipant[] = participants.map((p) => ({
-      friendId: friends.find((f) => f.name === p)?.id ?? generateID(),
-      name: p,
-      payments: [],
-    }))
+    const subParticipants: SubscriptionParticipant[] = participants.map((p) => {
+      const existing = initial?.participants.find((ep) => ep.name === p)
+      return {
+        friendId: existing?.friendId ?? friends.find((f) => f.name === p)?.id ?? generateID(),
+        name: p,
+        payments: existing?.payments ?? [],
+      }
+    })
 
     onSubmit({ name: name.trim(), totalAmount: parseFloat(totalAmount), billingCycle, startDate, participants: subParticipants })
   }
@@ -121,7 +125,7 @@ export function SubscriptionForm({ onSubmit, onCancel }: SubscriptionFormProps) 
 
       <div className="flex gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>
-        <Button type="submit" className="flex-1">Add Subscription</Button>
+        <Button type="submit" className="flex-1">{initial ? 'Save Changes' : 'Add Subscription'}</Button>
       </div>
     </form>
   )

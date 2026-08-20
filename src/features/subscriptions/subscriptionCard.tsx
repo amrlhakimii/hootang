@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Trash2, Users } from 'lucide-react'
+import { ChevronDown, ChevronUp, Trash2, Users, Pencil } from 'lucide-react'
 import { type Subscription } from '../../types/subscription'
 import { Button } from '../../components/layout/button'
 import { PaymentHistory } from './paymentHistory'
@@ -17,11 +17,12 @@ const serviceColors: Record<string, string> = {
 
 interface SubscriptionCardProps {
   subscription: Subscription
+  onEdit: (subscription: Subscription) => void
   onDelete: (id: string) => void
   onToggle: (subId: string, name: string, month: string) => void
 }
 
-export function SubscriptionCard({ subscription, onDelete, onToggle }: SubscriptionCardProps) {
+export function SubscriptionCard({ subscription, onEdit, onDelete, onToggle }: SubscriptionCardProps) {
   const [expanded, setExpanded] = useState(false)
   const color = serviceColors[subscription.name] || '#00ADB5'
   const perPerson = getCostPerPerson(subscription)
@@ -60,6 +61,9 @@ export function SubscriptionCard({ subscription, onDelete, onToggle }: Subscript
             </div>
             <Button size="sm" variant="ghost" onClick={() => setExpanded(!expanded)}>
               {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => onEdit(subscription)}>
+              <Pencil size={13} />
             </Button>
             <Button size="sm" variant="danger" onClick={() => onDelete(subscription.id)}>
               <Trash2 size={13} />

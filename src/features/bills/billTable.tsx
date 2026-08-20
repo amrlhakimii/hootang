@@ -1,4 +1,4 @@
-import { CheckCircle, Circle, Trash2, RefreshCw } from 'lucide-react'
+import { CheckCircle, Circle, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import { type Bill } from '../../types/bill'
 import { Button } from '../../components/layout/button'
 import { EmptyState } from '../../components/layout/emptyState'
@@ -18,10 +18,11 @@ interface BillTableProps {
   bills: Bill[]
   onPay: (id: string) => void
   onUnpay: (id: string) => void
+  onEdit: (bill: Bill) => void
   onDelete: (id: string) => void
 }
 
-export function BillTable({ bills, onPay, onUnpay, onDelete }: BillTableProps) {
+export function BillTable({ bills, onPay, onUnpay, onEdit, onDelete }: BillTableProps) {
   if (bills.length === 0) {
     return <EmptyState icon="🧾" title="No bills here" description="Track your recurring expenses" />
   }
@@ -67,6 +68,9 @@ export function BillTable({ bills, onPay, onUnpay, onDelete }: BillTableProps) {
                     <CheckCircle size={13} />
                   </Button>
                 )}
+                <Button size="sm" variant="secondary" onClick={() => onEdit(bill)}>
+                  <Pencil size={13} />
+                </Button>
                 <Button size="sm" variant="danger" onClick={() => onDelete(bill.id)}>
                   <Trash2 size={13} />
                 </Button>

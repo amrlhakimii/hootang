@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Input, Select, Label } from '../../components/layout/input'
 import { Button } from '../../components/layout/button'
-import { type BillCategory } from '../../types/bill'
+import { type Bill, type BillCategory } from '../../types/bill'
 
 interface BillFormProps {
+  initial?: Bill
   onSubmit: (data: {
     name: string
     amount: number
@@ -22,12 +23,12 @@ const categories: { value: BillCategory; label: string }[] = [
   { value: 'other', label: 'Other' },
 ]
 
-export function BillForm({ onSubmit, onCancel }: BillFormProps) {
-  const [name, setName] = useState('')
-  const [amount, setAmount] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [category, setCategory] = useState<BillCategory>('other')
-  const [recurring, setRecurring] = useState(false)
+export function BillForm({ initial, onSubmit, onCancel }: BillFormProps) {
+  const [name, setName] = useState(initial?.name ?? '')
+  const [amount, setAmount] = useState(initial ? String(initial.amount) : '')
+  const [dueDate, setDueDate] = useState(initial?.dueDate ?? '')
+  const [category, setCategory] = useState<BillCategory>(initial?.category ?? 'other')
+  const [recurring, setRecurring] = useState(initial?.recurring ?? false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,7 +75,7 @@ export function BillForm({ onSubmit, onCancel }: BillFormProps) {
 
       <div className="flex gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>
-        <Button type="submit" className="flex-1">Add Bill</Button>
+        <Button type="submit" className="flex-1">{initial ? 'Save Changes' : 'Add Bill'}</Button>
       </div>
     </form>
   )
