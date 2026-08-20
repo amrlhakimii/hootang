@@ -72,7 +72,12 @@ export function BillPage() {
       </div>
 
       <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(57,62,70,0.5)', border: '1px solid rgba(238,238,238,0.05)' }}>
-        <BillTable bills={filtered} onPay={(id) => updateStatus(id, 'paid')} onDelete={deleteBill} />
+        <BillTable
+          bills={filtered}
+          onPay={(id) => updateStatus(id, 'paid')}
+          onUnpay={(id) => updateStatus(id, 'pending')}
+          onDelete={deleteBill}
+        />
       </div>
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Add Bill">

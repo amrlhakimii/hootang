@@ -7,6 +7,7 @@ import { ReceiptPage } from '../features/receipt/receiptPage'
 import { FriendsPage } from '../features/friends/friendsPage'
 import { DicePage } from '../features/dice/dicePage'
 import { HistoryPage } from '../features/history/historyPage'
+import { SpendingPage } from '../features/spending/spendingPage'
 
 export function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ export function AppRoutes() {
       <Route path="/friends" element={<FriendsPage />} />
       <Route path="/dice" element={<DicePage />} />
       <Route path="/history" element={<HistoryPage />} />
+      <Route path="/spending" element={<SpendingPage />} />
     </Routes>
   )
 }

@@ -1,4 +1,4 @@
-import { CheckCircle, Trash2, RefreshCw } from 'lucide-react'
+import { CheckCircle, Circle, Trash2, RefreshCw } from 'lucide-react'
 import { type Bill } from '../../types/bill'
 import { Button } from '../../components/layout/button'
 import { EmptyState } from '../../components/layout/emptyState'
@@ -17,10 +17,11 @@ const categoryColors: Record<string, string> = {
 interface BillTableProps {
   bills: Bill[]
   onPay: (id: string) => void
+  onUnpay: (id: string) => void
   onDelete: (id: string) => void
 }
 
-export function BillTable({ bills, onPay, onDelete }: BillTableProps) {
+export function BillTable({ bills, onPay, onUnpay, onDelete }: BillTableProps) {
   if (bills.length === 0) {
     return <EmptyState icon="🧾" title="No bills here" description="Track your recurring expenses" />
   }
@@ -57,7 +58,11 @@ export function BillTable({ bills, onPay, onDelete }: BillTableProps) {
             <div className="flex items-center gap-2 shrink-0">
               <p className={`font-bold text-sm ${isPaid ? 'text-[#EEEEEE]/25' : 'text-red-400'}`}>{formatCurrency(bill.amount)}</p>
               <div className="flex gap-1">
-                {!isPaid && (
+                {isPaid ? (
+                  <Button size="sm" variant="secondary" onClick={() => onUnpay(bill.id)}>
+                    <Circle size={13} />
+                  </Button>
+                ) : (
                   <Button size="sm" variant="secondary" onClick={() => handlePay(bill.id)}>
                     <CheckCircle size={13} />
                   </Button>
