@@ -10,10 +10,12 @@ import {
   Users,
   Dice5,
   History,
+  Wallet,
 } from 'lucide-react'
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Home' },
+  { to: '/spending', icon: Wallet, label: 'Spending' },
   { to: '/loans', icon: HandCoins, label: 'Loans' },
   { to: '/bills', icon: Receipt, label: 'Bills' },
   { to: '/subscriptions', icon: Tv, label: 'Subs' },
