@@ -51,6 +51,28 @@ function monthKeyOf(dateStr: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
+const paymentLabels: Record<string, string> = {
+  cash: 'Cash',
+  card: 'Card',
+  apple_pay: 'Apple Pay',
+  qr: 'QR Pay',
+  tng: "Touch 'n Go",
+  shopee: 'ShopeePay',
+}
+
+const shopeeLabels: Record<string, string> = {
+  wallet: 'Wallet',
+  spaylater_1: 'SPayLater 1mo',
+  spaylater_3: 'SPayLater 3mo',
+  spaylater_6: 'SPayLater 6mo',
+}
+
+function paymentLabel(paymentMethod?: string, shopeeMethod?: string): string | undefined {
+  if (!paymentMethod) return undefined
+  if (paymentMethod === 'shopee' && shopeeMethod) return `ShopeePay · ${shopeeLabels[shopeeMethod] || shopeeMethod}`
+  return paymentLabels[paymentMethod] || paymentMethod
+}
+
 interface SpendItem {
   id: string
   source: 'bill' | 'subscription' | 'receipt' | 'manual'
@@ -58,6 +80,8 @@ interface SpendItem {
   description: string
   amount: number
   date: string
+  paymentMethod?: string
+  shopeeMethod?: string
 }
 
 export function SpendingPage() {
@@ -120,7 +144,7 @@ export function SpendingPage() {
 
       const manualItems: SpendItem[] = spendings
         .filter((s) => monthKeyOf(s.date) === monthKey)
-        .map((s) => ({ id: s.id, source: 'manual', category: s.category, description: s.description, amount: s.amount, date: s.date }))
+        .map((s) => ({ id: s.id, source: 'manual', category: s.category, description: s.description, amount: s.amount, date: s.date, paymentMethod: s.paymentMethod, shopeeMethod: s.shopeeMethod }))
 
       return [...billItems, ...subItems, ...receiptItems, ...manualItems]
     }
@@ -261,7 +285,12 @@ export function SpendingPage() {
                       <div className="w-1 h-9 rounded-full shrink-0" style={{ background: color }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-[#EEEEEE] text-sm font-medium truncate">{item.description}</p>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ background: `${color}18`, color }}>{item.category}</span>
+                        <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ background: `${color}18`, color }}>{item.category}</span>
+                          {paymentLabel(item.paymentMethod, item.shopeeMethod) && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-white/5 text-[#EEEEEE]/40">{paymentLabel(item.paymentMethod, item.shopeeMethod)}</span>
+                          )}
+                        </div>
                       </div>
                       <p className="font-bold text-sm shrink-0 text-red-400">{formatCurrency(item.amount)}</p>
                       {item.source === 'manual' && (

@@ -1,10 +1,17 @@
 import { useState } from 'react'
 import { Input, Select, Label } from '../../components/layout/input'
 import { Button } from '../../components/layout/button'
-import { type SpendingCategory } from '../../types/spending'
+import { type SpendingCategory, type PaymentMethod, type ShopeePayMethod } from '../../types/spending'
 
 interface SpendingFormProps {
-  onSubmit: (data: { description: string; amount: number; category: SpendingCategory; date: string }) => void
+  onSubmit: (data: {
+    description: string
+    amount: number
+    category: SpendingCategory
+    date: string
+    paymentMethod: PaymentMethod
+    shopeeMethod?: ShopeePayMethod
+  }) => void
   onCancel: () => void
 }
 
@@ -19,6 +26,22 @@ const categories: { value: SpendingCategory; label: string }[] = [
   { value: 'other', label: 'Other' },
 ]
 
+const paymentMethods: { value: PaymentMethod; label: string }[] = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'card', label: 'Card' },
+  { value: 'apple_pay', label: 'Apple Pay' },
+  { value: 'qr', label: 'QR Pay' },
+  { value: 'tng', label: "Touch 'n Go" },
+  { value: 'shopee', label: 'ShopeePay' },
+]
+
+const shopeeMethods: { value: ShopeePayMethod; label: string }[] = [
+  { value: 'wallet', label: 'Wallet (direct)' },
+  { value: 'spaylater_1', label: 'SPayLater · 1 month' },
+  { value: 'spaylater_3', label: 'SPayLater · 3 months' },
+  { value: 'spaylater_6', label: 'SPayLater · 6 months' },
+]
+
 function today(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -29,11 +52,20 @@ export function SpendingForm({ onSubmit, onCancel }: SpendingFormProps) {
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState<SpendingCategory>('food')
   const [date, setDate] = useState(today())
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
+  const [shopeeMethod, setShopeeMethod] = useState<ShopeePayMethod>('wallet')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!description.trim() || !amount) return
-    onSubmit({ description: description.trim(), amount: parseFloat(amount), category, date })
+    onSubmit({
+      description: description.trim(),
+      amount: parseFloat(amount),
+      category,
+      date,
+      paymentMethod,
+      shopeeMethod: paymentMethod === 'shopee' ? shopeeMethod : undefined,
+    })
   }
 
   return (
@@ -62,6 +94,26 @@ export function SpendingForm({ onSubmit, onCancel }: SpendingFormProps) {
         <Label htmlFor="date">Date</Label>
         <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
       </div>
+
+      <div>
+        <Label htmlFor="paymentMethod">Paid with</Label>
+        <Select id="paymentMethod" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}>
+          {paymentMethods.map((p) => (
+            <option key={p.value} value={p.value}>{p.label}</option>
+          ))}
+        </Select>
+      </div>
+
+      {paymentMethod === 'shopee' && (
+        <div>
+          <Label htmlFor="shopeeMethod">ShopeePay method</Label>
+          <Select id="shopeeMethod" value={shopeeMethod} onChange={(e) => setShopeeMethod(e.target.value as ShopeePayMethod)}>
+            {shopeeMethods.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </Select>
+        </div>
+      )}
 
       <div className="flex gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>
