@@ -65,7 +65,7 @@ export function SpendingForm({ initial, onSubmit, onCancel }: SpendingFormProps)
       category,
       date,
       paymentMethod,
-      shopeeMethod: paymentMethod === 'shopee' ? shopeeMethod : undefined,
+      ...(paymentMethod === 'shopee' ? { shopeeMethod } : {}),
     })
   }
 
