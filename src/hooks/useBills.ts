@@ -19,7 +19,7 @@ function rollToCurrentMonth(dateStr: string, now: Date): string {
 }
 
 export function useBills() {
-  const [bills, setBills] = useFirestoreCollection<Bill>('hootang_bills', 'bills')
+  const [bills, setBills, loading] = useFirestoreCollection<Bill>('hootang_bills', 'bills')
 
   // Recurring bills marked paid should reopen once their due month has passed.
   useEffect(() => {
@@ -58,5 +58,5 @@ export function useBills() {
 
   const pendingBills = bills.filter((b) => b.status === 'pending')
 
-  return { bills, addBill, updateStatus, updateBill, deleteBill, pendingBills }
+  return { bills, addBill, updateStatus, updateBill, deleteBill, pendingBills, loading }
 }

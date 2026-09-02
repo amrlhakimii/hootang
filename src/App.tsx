@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { useAuth } from './context/AuthContext'
+import { ToastProvider } from './context/ToastContext'
 import { TopHeader } from './components/ui/mobileHeader'
 import { FloatingNav } from './components/ui/floatingNav'
 import { FloatingBackground } from './components/ui/floatingBackground'
@@ -38,9 +39,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ToastProvider>
   )
 }
 

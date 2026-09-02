@@ -12,4 +12,5 @@ export interface Spending {
   date: string
   paymentMethod: PaymentMethod
   shopeeMethod?: ShopeePayMethod
+  recurring?: boolean
 }

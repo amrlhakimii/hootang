@@ -3,7 +3,7 @@ import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useLoans() {
-  const [loans, setLoans] = useFirestoreCollection<Loan>('hootang_loans', 'loans')
+  const [loans, setLoans, loading] = useFirestoreCollection<Loan>('hootang_loans', 'loans')
 
   const addLoan = (data: Omit<Loan, 'id' | 'status'>) => {
     const loan: Loan = { ...data, id: generateID(), status: 'pending' }
@@ -26,5 +26,5 @@ export function useLoans() {
     .filter((l) => l.type === 'borrowed' && l.status === 'pending')
     .reduce((sum, l) => sum + l.amount, 0)
 
-  return { loans, addLoan, updateStatus, deleteLoan, totalOwed, totalOwing }
+  return { loans, addLoan, updateStatus, deleteLoan, totalOwed, totalOwing, loading }
 }

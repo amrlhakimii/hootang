@@ -42,11 +42,12 @@ const quickActions = [
 
 export function DashboardPage() {
   const navigate = useNavigate()
-  const { loans, totalOwed, totalOwing } = useLoans()
-  const { bills, pendingBills } = useBills()
-  const { subscriptions } = useSubscriptions()
-  const { receipts } = useReceipts()
+  const { loans, totalOwed, totalOwing, loading: loansLoading } = useLoans()
+  const { bills, pendingBills, loading: billsLoading } = useBills()
+  const { subscriptions, loading: subsLoading } = useSubscriptions()
+  const { receipts, loading: receiptsLoading } = useReceipts()
   const spendingTotals = useSpendingTotals()
+  const dataLoading = loansLoading || billsLoading || subsLoading || receiptsLoading || spendingTotals.loading
 
   const net = totalOwed - totalOwing
   const activeLoans = loans.filter((l) => l.status === 'pending').length
@@ -145,7 +146,11 @@ export function DashboardPage() {
 
       {/* Hero balance card */}
       <div ref={balanceRef} className="mb-5">
-        <DailySpendingCard today={spendingTotals.today} week={spendingTotals.week} month={spendingTotals.month} />
+        {dataLoading ? (
+          <div className="skeleton rounded-3xl" style={{ height: 236 }} />
+        ) : (
+          <DailySpendingCard today={spendingTotals.today} week={spendingTotals.week} month={spendingTotals.month} />
+        )}
       </div>
 
       {/* Quick actions */}
@@ -176,31 +181,40 @@ export function DashboardPage() {
 
       {/* Stat chips row */}
       <div ref={chipsRef} className="flex gap-2 overflow-x-auto mb-5" style={{ scrollbarWidth: 'none' }}>
-        {[
-          { icon: <HandCoins size={14} />, label: 'Active Loans', value: activeLoans, color: '#00ADB5' },
-          { icon: <Receipt size={14} />, label: 'Pending Bills', value: pendingBills.length, color: '#f59e0b' },
-          { icon: <Tv size={14} />, label: 'Subscriptions', value: subscriptions.length, color: '#8b5cf6' },
-          { icon: <UtensilsCrossed size={14} />, label: 'Splits', value: receipts.length, color: '#ec4899' },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-full shrink-0"
-            style={{ background: `${stat.color}12`, border: `1px solid ${stat.color}22` }}
-          >
-            <span style={{ color: stat.color }}>{stat.icon}</span>
-            <span
-              style={{ fontFamily: "'Syne', sans-serif", color: stat.color }}
-              className="text-base font-extrabold leading-none"
-            >
-              {stat.value}
-            </span>
-            <span className="text-[#EEEEEE]/35 text-xs font-medium">{stat.label}</span>
-          </div>
-        ))}
+        {dataLoading
+          ? [0, 1, 2, 3].map((i) => <div key={i} className="skeleton rounded-full h-9 w-32 shrink-0" />)
+          : [
+              { icon: <HandCoins size={14} />, label: 'Active Loans', value: activeLoans, color: '#00ADB5' },
+              { icon: <Receipt size={14} />, label: 'Pending Bills', value: pendingBills.length, color: '#f59e0b' },
+              { icon: <Tv size={14} />, label: 'Subscriptions', value: subscriptions.length, color: '#8b5cf6' },
+              { icon: <UtensilsCrossed size={14} />, label: 'Splits', value: receipts.length, color: '#ec4899' },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="flex items-center gap-2 px-3.5 py-2.5 rounded-full shrink-0"
+                style={{ background: `${stat.color}12`, border: `1px solid ${stat.color}22` }}
+              >
+                <span style={{ color: stat.color }}>{stat.icon}</span>
+                <span
+                  style={{ fontFamily: "'Syne', sans-serif", color: stat.color }}
+                  className="text-base font-extrabold leading-none"
+                >
+                  {stat.value}
+                </span>
+                <span className="text-[#EEEEEE]/35 text-xs font-medium">{stat.label}</span>
+              </div>
+            ))}
       </div>
 
       {/* Activity feed */}
-      <ActivityCard loans={loans} bills={bills} />
+      {dataLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="skeleton rounded-2xl h-48" />
+          <div className="skeleton rounded-2xl h-48" />
+        </div>
+      ) : (
+        <ActivityCard loans={loans} bills={bills} />
+      )}
     </PageContainer>
   )
 }

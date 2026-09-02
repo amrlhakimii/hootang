@@ -3,7 +3,7 @@ import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useSubscriptions() {
-  const [subscriptions, setSubscriptions] = useFirestoreCollection<Subscription>('hootang_subs', 'subscriptions')
+  const [subscriptions, setSubscriptions, loading] = useFirestoreCollection<Subscription>('hootang_subs', 'subscriptions')
 
   const addSubscription = (data: Omit<Subscription, 'id'>) => {
     const sub: Subscription = { ...data, id: generateID() }
@@ -42,5 +42,5 @@ export function useSubscriptions() {
     )
   }
 
-  return { subscriptions, addSubscription, updateSubscription, deleteSubscription, togglePayment }
+  return { subscriptions, addSubscription, updateSubscription, deleteSubscription, togglePayment, loading }
 }

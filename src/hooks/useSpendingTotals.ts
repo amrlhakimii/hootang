@@ -6,17 +6,18 @@ import { useReceipts } from './useReceipt'
 import { useSpendings } from './useSpending'
 import { getCostPerPerson } from '../utils/calculateSubscription'
 import { calculateReceiptSplit } from '../utils/calculateSplit'
-import { toDateKey, monthKeyOf } from '../utils/formatDate'
+import { toDateKey, monthKeyOf, recurDateInMonth } from '../utils/formatDate'
 
 export function useSpendingTotals() {
   const { user } = useAuth()
   const ME = (user?.displayName ?? '').trim().toLowerCase()
-  const { bills } = useBills()
-  const { subscriptions } = useSubscriptions()
-  const { receipts } = useReceipts()
-  const { spendings } = useSpendings()
+  const { bills, loading: billsLoading } = useBills()
+  const { subscriptions, loading: subsLoading } = useSubscriptions()
+  const { receipts, loading: receiptsLoading } = useReceipts()
+  const { spendings, loading: spendingsLoading } = useSpendings()
+  const loading = billsLoading || subsLoading || receiptsLoading || spendingsLoading
 
-  return useMemo(() => {
+  const totals = useMemo(() => {
     const now = new Date()
     const todayStr = toDateKey(now)
     const startOfWeek = new Date(now)
@@ -54,8 +55,13 @@ export function useSpendingTotals() {
     }
     for (const sp of spendings) {
       add(sp.date, sp.amount)
+      if (sp.recurring && monthKeyOf(sp.date) !== currentMonth) {
+        add(recurDateInMonth(sp.date, currentMonth), sp.amount)
+      }
     }
 
     return { today, week, month }
   }, [bills, subscriptions, receipts, spendings, ME])
+
+  return { ...totals, loading }
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Repeat } from 'lucide-react'
 import { Input, Select, Label } from '../../components/layout/input'
 import { Button } from '../../components/layout/button'
 import { type Spending, type SpendingCategory, type PaymentMethod, type ShopeePayMethod } from '../../types/spending'
@@ -12,6 +13,7 @@ interface SpendingFormProps {
     date: string
     paymentMethod: PaymentMethod
     shopeeMethod?: ShopeePayMethod
+    recurring?: boolean
   }) => void
   onCancel: () => void
 }
@@ -55,6 +57,7 @@ export function SpendingForm({ initial, onSubmit, onCancel }: SpendingFormProps)
   const [date, setDate] = useState(initial?.date ?? today())
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initial?.paymentMethod ?? 'cash')
   const [shopeeMethod, setShopeeMethod] = useState<ShopeePayMethod>(initial?.shopeeMethod ?? 'wallet')
+  const [recurring, setRecurring] = useState(initial?.recurring ?? false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,6 +69,7 @@ export function SpendingForm({ initial, onSubmit, onCancel }: SpendingFormProps)
       date,
       paymentMethod,
       ...(paymentMethod === 'shopee' ? { shopeeMethod } : {}),
+      ...(recurring ? { recurring: true } : {}),
     })
   }
 
@@ -115,6 +119,12 @@ export function SpendingForm({ initial, onSubmit, onCancel }: SpendingFormProps)
           </Select>
         </div>
       )}
+
+      <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl px-3 py-2.5" style={{ background: 'rgba(0,173,181,0.06)', border: '1px solid rgba(0,173,181,0.15)' }}>
+        <input type="checkbox" checked={recurring} onChange={(e) => setRecurring(e.target.checked)} className="accent-[#00ADB5] w-4 h-4" />
+        <Repeat size={14} className="text-[#00ADB5]/70 shrink-0" />
+        <span className="text-[#EEEEEE]/70 text-xs font-medium">Repeats every month</span>
+      </label>
 
       <div className="flex gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>

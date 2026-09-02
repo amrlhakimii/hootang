@@ -3,7 +3,7 @@ import { useFirestoreCollection } from './useFirestoreCollection'
 import { generateID } from '../utils/generateID'
 
 export function useReceipts() {
-  const [receipts, setReceipts] = useFirestoreCollection<Receipt>('hootang_receipts', 'receipts')
+  const [receipts, setReceipts, loading] = useFirestoreCollection<Receipt>('hootang_receipts', 'receipts')
 
   const addReceipt = (data: Omit<Receipt, 'id'>) => {
     const receipt: Receipt = { ...data, id: generateID() }
@@ -18,5 +18,5 @@ export function useReceipts() {
     setReceipts((prev) => prev.filter((r) => r.id !== id))
   }
 
-  return { receipts, addReceipt, updateReceipt, deleteReceipt }
+  return { receipts, addReceipt, updateReceipt, deleteReceipt, loading }
 }
