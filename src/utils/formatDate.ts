@@ -14,3 +14,12 @@ export function formatMonth(monthStr: string): string {
   const d = new Date(Number(year), Number(month) - 1)
   return d.toLocaleDateString('en-MY', { month: 'short', year: 'numeric' })
 }
+
+export function toDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+export function monthKeyOf(dateStr: string): string {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}

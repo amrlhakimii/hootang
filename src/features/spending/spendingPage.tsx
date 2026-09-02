@@ -19,8 +19,7 @@ import { type Spending } from '../../types/spending'
 import { type Bill } from '../../types/bill'
 import { type Subscription } from '../../types/subscription'
 import { formatCurrency } from '../../utils/formatCurrency'
-import { formatDate } from '../../utils/formatDate'
-import { getCurrentMonth, formatMonth } from '../../utils/formatDate'
+import { formatDate, getCurrentMonth, formatMonth, toDateKey, monthKeyOf } from '../../utils/formatDate'
 import { getCostPerPerson } from '../../utils/calculateSubscription'
 import { calculateReceiptSplit } from '../../utils/calculateSplit'
 
@@ -48,15 +47,6 @@ function colorFor(category: string) {
 function shiftMonth(month: string, delta: number): string {
   const [y, m] = month.split('-').map(Number)
   const d = new Date(y, m - 1 + delta, 1)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-}
-
-function toDateKey(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-function monthKeyOf(dateStr: string): string {
-  const d = new Date(dateStr)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 

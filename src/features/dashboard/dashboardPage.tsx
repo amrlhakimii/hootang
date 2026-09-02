@@ -3,20 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { HandCoins, Receipt, Tv, UtensilsCrossed } from 'lucide-react'
 import { gsap } from 'gsap'
 import { PageContainer } from '../../components/ui/pageContainer'
-import { BalanceCard } from './balanceCard'
+import { DailySpendingCard } from './dailySpendingCard'
 import { ActivityCard } from './activityCard'
 import { useLoans } from '../../hooks/useLoans'
 import { useBills } from '../../hooks/useBills'
 import { useSubscriptions } from '../../hooks/useSubscription'
 import { useReceipts } from '../../hooks/useReceipt'
+import { useSpendingTotals } from '../../hooks/useSpendingTotals'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 function getGreeting() {
   const h = new Date().getHours()
-  if (h < 5) return 'Still up? 🌙'
-  if (h < 12) return 'Morning 👋'
-  if (h < 18) return 'Afternoon ☀️'
-  return 'Evening 🌆'
+  if (h < 5) return 'Still up?'
+  if (h < 12) return 'Morning'
+  if (h < 18) return 'Afternoon'
+  return 'Evening'
 }
 
 function getDate() {
@@ -45,6 +46,7 @@ export function DashboardPage() {
   const { bills, pendingBills } = useBills()
   const { subscriptions } = useSubscriptions()
   const { receipts } = useReceipts()
+  const spendingTotals = useSpendingTotals()
 
   const net = totalOwed - totalOwing
   const activeLoans = loans.filter((l) => l.status === 'pending').length
@@ -143,7 +145,7 @@ export function DashboardPage() {
 
       {/* Hero balance card */}
       <div ref={balanceRef} className="mb-5">
-        <BalanceCard owed={totalOwed} owing={totalOwing} />
+        <DailySpendingCard today={spendingTotals.today} week={spendingTotals.week} month={spendingTotals.month} />
       </div>
 
       {/* Quick actions */}
