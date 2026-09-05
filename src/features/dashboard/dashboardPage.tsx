@@ -10,6 +10,7 @@ import { useBills } from '../../hooks/useBills'
 import { useSubscriptions } from '../../hooks/useSubscription'
 import { useReceipts } from '../../hooks/useReceipt'
 import { useSpendingTotals } from '../../hooks/useSpendingTotals'
+import { useSpendings } from '../../hooks/useSpending'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 function getGreeting() {
@@ -47,7 +48,8 @@ export function DashboardPage() {
   const { subscriptions, loading: subsLoading } = useSubscriptions()
   const { receipts, loading: receiptsLoading } = useReceipts()
   const spendingTotals = useSpendingTotals()
-  const dataLoading = loansLoading || billsLoading || subsLoading || receiptsLoading || spendingTotals.loading
+  const { spendings, loading: spendingsLoading } = useSpendings()
+  const dataLoading = loansLoading || billsLoading || subsLoading || receiptsLoading || spendingTotals.loading || spendingsLoading
 
   const net = totalOwed - totalOwing
   const activeLoans = loans.filter((l) => l.status === 'pending').length
@@ -213,7 +215,7 @@ export function DashboardPage() {
           <div className="skeleton rounded-2xl h-48" />
         </div>
       ) : (
-        <ActivityCard loans={loans} bills={bills} />
+        <ActivityCard spendings={spendings} bills={bills} />
       )}
     </PageContainer>
   )
