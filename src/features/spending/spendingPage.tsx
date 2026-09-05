@@ -276,18 +276,18 @@ export function SpendingPage() {
       <Navbar title="Spending" action={<Button onClick={() => { setEditingSpending(null); setShowModal(true) }}><Plus size={15} /> Add Spending</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Every ringgit, tracked. Today, this week, this month.</p>
 
-      <div ref={statsRef} className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
-        <div className="rounded-2xl p-2.5 sm:p-4 min-w-0" style={{ background: 'linear-gradient(145deg, #f8717118 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #f8717125' }}>
-          <p style={{ fontFamily: "'Syne', sans-serif", color: '#f87171' }} className="text-xs sm:text-base md:text-xl font-extrabold leading-none mb-1 truncate">{formatCurrency(todayTotal)}</p>
-          <p className="text-[#EEEEEE]/40 text-[10px] font-medium truncate">Today</p>
+      <div ref={statsRef} className="flex flex-col sm:grid sm:grid-cols-3 gap-2 sm:gap-3 mb-6">
+        <div className="rounded-2xl p-3 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 min-w-0" style={{ background: 'linear-gradient(145deg, #f8717118 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #f8717125' }}>
+          <p className="text-[#EEEEEE]/40 text-xs sm:text-[10px] font-medium order-1 sm:order-2 sm:mt-1">Today</p>
+          <p style={{ fontFamily: "'Syne', sans-serif", color: '#f87171' }} className="text-lg sm:text-base md:text-xl font-extrabold leading-none order-2 sm:order-1">{formatCurrency(todayTotal)}</p>
         </div>
-        <div className="rounded-2xl p-2.5 sm:p-4 min-w-0" style={{ background: 'linear-gradient(145deg, #00ADB518 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #00ADB525' }}>
-          <p style={{ fontFamily: "'Syne', sans-serif", color: '#00ADB5' }} className="text-xs sm:text-base md:text-xl font-extrabold leading-none mb-1 truncate">{formatCurrency(weekTotal)}</p>
-          <p className="text-[#EEEEEE]/40 text-[10px] font-medium truncate">This week</p>
+        <div className="rounded-2xl p-3 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 min-w-0" style={{ background: 'linear-gradient(145deg, #00ADB518 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #00ADB525' }}>
+          <p className="text-[#EEEEEE]/40 text-xs sm:text-[10px] font-medium order-1 sm:order-2 sm:mt-1">This week</p>
+          <p style={{ fontFamily: "'Syne', sans-serif", color: '#00ADB5' }} className="text-lg sm:text-base md:text-xl font-extrabold leading-none order-2 sm:order-1">{formatCurrency(weekTotal)}</p>
         </div>
-        <div className="rounded-2xl p-2.5 sm:p-4 min-w-0" style={{ background: 'linear-gradient(145deg, #8b5cf618 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #8b5cf625' }}>
-          <p style={{ fontFamily: "'Syne', sans-serif", color: '#8b5cf6' }} className="text-xs sm:text-base md:text-xl font-extrabold leading-none mb-1 truncate">{formatCurrency(total)}</p>
-          <p className="text-[#EEEEEE]/40 text-[10px] font-medium truncate">This month</p>
+        <div className="rounded-2xl p-3 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 min-w-0" style={{ background: 'linear-gradient(145deg, #8b5cf618 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #8b5cf625' }}>
+          <p className="text-[#EEEEEE]/40 text-xs sm:text-[10px] font-medium order-1 sm:order-2 sm:mt-1">This month</p>
+          <p style={{ fontFamily: "'Syne', sans-serif", color: '#8b5cf6' }} className="text-lg sm:text-base md:text-xl font-extrabold leading-none order-2 sm:order-1">{formatCurrency(total)}</p>
         </div>
       </div>
 
