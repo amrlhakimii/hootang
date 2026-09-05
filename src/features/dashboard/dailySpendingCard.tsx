@@ -34,7 +34,7 @@ export function DailySpendingCard({ today, week, month }: DailySpendingCardProps
 
   return (
     <div
-      className="rounded-3xl p-6 md:p-8 relative overflow-hidden"
+      className="rounded-3xl p-5 sm:p-6 md:p-8 relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #00ADB5 0%, #007a80 45%, #1a2330 100%)',
         boxShadow: '0 24px 64px rgba(0,173,181,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
@@ -86,19 +86,18 @@ export function DailySpendingCard({ today, week, month }: DailySpendingCardProps
         <p
           ref={todayRef}
           style={{ fontFamily: "'Syne', sans-serif" }}
-          className="text-5xl md:text-6xl font-extrabold text-white leading-none tracking-tight mb-6"
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-none tracking-tight mb-6 break-all"
         />
 
         {/* Week / Month row */}
-        <div className="flex gap-6">
-          <div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="min-w-0 pr-3" style={{ borderRight: '1px solid rgba(255,255,255,0.15)' }}>
             <p className="text-white/45 text-xs mb-0.5">This week</p>
-            <p ref={weekRef} className="text-white font-bold text-lg leading-none" />
+            <p ref={weekRef} className="text-white font-bold text-base sm:text-lg leading-none truncate" />
           </div>
-          <div className="w-px" style={{ background: 'rgba(255,255,255,0.15)' }} />
-          <div>
+          <div className="min-w-0">
             <p className="text-white/45 text-xs mb-0.5">This month</p>
-            <p ref={monthRef} className="text-white font-bold text-lg leading-none" />
+            <p ref={monthRef} className="text-white font-bold text-base sm:text-lg leading-none truncate" />
           </div>
         </div>
       </div>
