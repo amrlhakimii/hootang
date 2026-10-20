@@ -6,6 +6,8 @@ import { formatCurrency } from '../../utils/formatCurrency'
 import { generateReceiptPDF } from '../../utils/generateReceiptPDF'
 import { generateReceiptPDFBlob } from '../../utils/generateReceiptPDFBlob'
 import { shareWhatsApp } from '../../utils/shareWhatsApp'
+import { getReceiptQr } from '../../utils/duitnow'
+import { useProfile } from '../../hooks/useProfile'
 import { Button } from '../../components/layout/button'
 
 interface ReceiptDetailProps {
@@ -29,6 +31,8 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
   const grandTotal = subtotal + taxAmt + serviceAmt
   const settledBy = receipt.settledBy ?? []
   const [sharing, setSharing] = useState(false)
+  const { profile } = useProfile()
+  const qr = getReceiptQr(receipt, profile)
 
   const toggleSettle = (name: string) => {
     const newSettledBy = settledBy.includes(name)
@@ -40,7 +44,7 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
   const handleShare = async () => {
     setSharing(true)
     try {
-      const blob = await generateReceiptPDFBlob(receipt)
+      const blob = await generateReceiptPDFBlob(receipt, { qrDataUrl: qr })
       const safeName = receipt.title.replace(/[^a-z0-9]/gi, '_')
       const file = new File([blob], `${safeName}.pdf`, { type: 'application/pdf' })
       if (navigator.canShare?.({ files: [file] })) {
@@ -75,7 +79,7 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
           {sharing ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
           {sharing ? 'Generating…' : 'Share'}
         </Button>
-        <Button variant="secondary" size="sm" onClick={() => generateReceiptPDF(receipt)}>
+        <Button variant="secondary" size="sm" onClick={() => generateReceiptPDF(receipt, { qrDataUrl: qr })}>
           <FileDown size={14} /> PDF
         </Button>
       </div>
@@ -117,7 +121,9 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
                 {receipt.splitMode === 'itemized' && item.assignedTo.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {item.assignedTo.map((p) => (
-                      <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-white/6 text-[#EEEEEE]/40">{p}</span>
+                      <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-white/6 text-[#EEEEEE]/40">
+                        {p}{item.customAmounts ? ` · ${formatCurrency(item.customAmounts[p] ?? 0)}` : ''}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -203,6 +209,16 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
           })}
         </div>
       </div>
+
+      {qr && (
+        <div className="bg-[#222831] rounded-xl p-3 flex items-center gap-4">
+          <img src={qr} alt="DuitNow QR" className="w-24 h-24 rounded-lg bg-white p-1 object-contain shrink-0" />
+          <div>
+            <p className="text-[#EEEEEE] text-sm font-semibold">Pay via DuitNow</p>
+            <p className="text-[#EEEEEE]/40 text-xs mt-0.5">Included in the PDF and shared file.</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

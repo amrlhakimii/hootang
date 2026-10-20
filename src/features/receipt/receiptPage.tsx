@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, FileDown, Layers, Plus, Trash2, UtensilsCrossed, Users, X } from 'lucide-react'
+import { Check, FileDown, Layers, Plus, QrCode, Trash2, UtensilsCrossed, Users, X } from 'lucide-react'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Button } from '../../components/layout/button'
@@ -7,6 +7,7 @@ import { Modal } from '../../components/layout/modal'
 import { EmptyState } from '../../components/layout/emptyState'
 import { ReceiptForm } from './receiptForm'
 import { ReceiptDetail } from './receiptDetail'
+import { DuitNowSettings } from './duitnowSettings'
 import { useReceipts } from '../../hooks/useReceipt'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
@@ -23,6 +24,7 @@ export function ReceiptPage() {
   const [showModal, setShowModal] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [showQrSettings, setShowQrSettings] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
@@ -70,6 +72,9 @@ export function ReceiptPage() {
     </Button>
   ) : (
     <div className="flex gap-2">
+      <Button variant="secondary" onClick={() => setShowQrSettings(true)} aria-label="My DuitNow QR">
+        <QrCode size={14} /> <span className="hidden sm:inline">DuitNow QR</span>
+      </Button>
       {receipts.length >= 2 && (
         <Button variant="secondary" onClick={() => setSelectMode(true)}>
           <Layers size={14} /> Combine
@@ -216,6 +221,7 @@ export function ReceiptPage() {
           />
         )}
       </Modal>
+      <DuitNowSettings isOpen={showQrSettings} onClose={() => setShowQrSettings(false)} />
     </PageContainer>
   )
 }

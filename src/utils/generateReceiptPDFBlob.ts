@@ -12,7 +12,10 @@ const CARD_COLORS = [
   { bg: [255, 241, 242], name: [136, 19, 55], amount: [225, 29, 72] },
 ] as const
 
-export async function generateReceiptPDFBlob(receipt: Receipt): Promise<Blob> {
+export async function generateReceiptPDFBlob(
+  receipt: Receipt,
+  options: { qrDataUrl?: string } = {},
+): Promise<Blob> {
   const doc = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' })
   const shares = calculateReceiptSplit(receipt)
   const rawSubtotal = receipt.items.reduce((sum, i) => sum + i.price * (i.quantity ?? 1), 0)
@@ -192,6 +195,39 @@ export async function generateReceiptPDFBlob(receipt: Receipt): Promise<Blob> {
       }
     }
     y += cardH + 4
+  }
+
+  // DuitNow QR (only when provided, i.e. the user paid)
+  if (options.qrDataUrl && receipt.paidBy) {
+    const qrSize = 40
+    y += 4
+    checkPage(qrSize + 16)
+    doc.setDrawColor(220, 201, 168)
+    doc.line(M, y, W - M, y)
+    y += 8
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setTextColor(154, 123, 88)
+    doc.text('PAY VIA DUITNOW', M, y)
+    y += 5
+    const fmt = options.qrDataUrl.startsWith('data:image/jpeg') ? 'JPEG' : 'PNG'
+    doc.addImage(options.qrDataUrl, fmt, M, y, qrSize, qrSize)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(26, 15, 0)
+    doc.text(`Scan to pay ${receipt.paidBy}`, M + qrSize + 8, y + 8)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(120, 97, 74)
+    let ly = y + 16
+    shares
+      .filter((s) => s.name !== receipt.paidBy && !settledBy.includes(s.name))
+      .forEach((s) => {
+        doc.text(s.name, M + qrSize + 8, ly)
+        doc.text(`RM ${s.total.toFixed(2)}`, W - M, ly, { align: 'right' })
+        ly += 5.5
+      })
+    y += qrSize + 6
   }
 
   // Footer
