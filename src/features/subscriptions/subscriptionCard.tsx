@@ -36,7 +36,7 @@ export function SubscriptionCard({ subscription, onEdit, onDelete, onToggle }: S
       <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
 
       <div className="p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-black text-white shrink-0"
@@ -54,8 +54,8 @@ export function SubscriptionCard({ subscription, onEdit, onDelete, onToggle }: S
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="text-right mr-1">
+          <div className="flex items-center gap-2 shrink-0 justify-between sm:justify-end">
+            <div className="text-left sm:text-right mr-auto sm:mr-1">
               <p style={{ fontFamily: "'Syne', sans-serif" }} className="text-[#EEEEEE] font-extrabold text-base leading-none">{formatCurrency(perPerson)}</p>
               <p className="text-[#EEEEEE]/30 text-[10px] mt-0.5">per person</p>
             </div>
