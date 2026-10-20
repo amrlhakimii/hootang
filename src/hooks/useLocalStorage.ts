@@ -15,7 +15,9 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       const next = typeof value === 'function' ? (value as (prev: T) => T)(prev) : value
       try {
         localStorage.setItem(key, JSON.stringify(next))
-      } catch {}
+      } catch {
+        // storage full or unavailable: keep the in-memory value
+      }
       return next
     })
   }
