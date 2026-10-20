@@ -4,14 +4,20 @@ import { CheckCircle2, XCircle, Info, Loader2 } from 'lucide-react'
 
 type ToastType = 'success' | 'error' | 'info' | 'loading'
 
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 interface Toast {
   id: string
   message: string
   type: ToastType
+  action?: ToastAction
 }
 
 interface ToastContextType {
-  toast: (message: string, type?: ToastType, durationMs?: number) => string
+  toast: (message: string, type?: ToastType, durationMs?: number, action?: ToastAction) => string
   dismiss: (id: string) => void
 }
 
@@ -34,9 +40,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     if (timer) { clearTimeout(timer); timers.current.delete(id) }
   }, [])
 
-  const toast = useCallback((message: string, type: ToastType = 'info', durationMs = 3200) => {
+  const toast = useCallback((message: string, type: ToastType = 'info', durationMs = 3200, action?: ToastAction) => {
     const id = Math.random().toString(36).slice(2)
-    setToasts((prev) => [...prev, { id, message, type }])
+    setToasts((prev) => [...prev, { id, message, type, action }])
     if (durationMs > 0) {
       const timer = setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id))
@@ -52,6 +58,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {createPortal(
         <div
+          role="status"
+          aria-live="polite"
           className="fixed left-1/2 flex flex-col items-center gap-2 pointer-events-none"
           style={{ top: 'calc(env(safe-area-inset-top) + 14px)', transform: 'translateX(-50%)', zIndex: 10000, width: 'min(92vw, 380px)' }}
         >
@@ -68,7 +76,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               }}
             >
               {icons[t.type]}
-              <span className="truncate">{t.message}</span>
+              <span className="truncate flex-1">{t.message}</span>
+              {t.action && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    t.action?.onClick()
+                    dismiss(t.id)
+                  }}
+                  className="shrink-0 -my-2 -mr-2 px-3 py-2 min-h-[44px] rounded-xl text-[#00ADB5] font-semibold hover:bg-white/5 cursor-pointer"
+                >
+                  {t.action.label}
+                </button>
+              )}
             </div>
           ))}
         </div>,
@@ -78,6 +99,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   const ctx = useContext(ToastContext)
   if (!ctx) throw new Error('useToast must be used within ToastProvider')

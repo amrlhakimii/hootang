@@ -18,5 +18,9 @@ export function useFriends() {
     setFriends((prev) => prev.filter((f) => f.id !== id))
   }
 
-  return { friends, addFriend, updateFriend, deleteFriend }
+  const restoreFriend = (item: Friend) => {
+    setFriends((prev) => (prev.some((i) => i.id === item.id) ? prev : [item, ...prev]))
+  }
+
+  return { friends, addFriend, updateFriend, deleteFriend, restoreFriend }
 }

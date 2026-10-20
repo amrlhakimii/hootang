@@ -18,5 +18,9 @@ export function useReceipts() {
     setReceipts((prev) => prev.filter((r) => r.id !== id))
   }
 
-  return { receipts, addReceipt, updateReceipt, deleteReceipt, loading }
+  const restoreReceipt = (item: Receipt) => {
+    setReceipts((prev) => (prev.some((i) => i.id === item.id) ? prev : [item, ...prev]))
+  }
+
+  return { receipts, addReceipt, updateReceipt, deleteReceipt, restoreReceipt, loading }
 }

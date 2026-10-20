@@ -56,7 +56,11 @@ export function useBills() {
     setBills((prev) => prev.filter((b) => b.id !== id))
   }
 
+  const restoreBill = (item: Bill) => {
+    setBills((prev) => (prev.some((i) => i.id === item.id) ? prev : [item, ...prev]))
+  }
+
   const pendingBills = bills.filter((b) => b.status === 'pending')
 
-  return { bills, addBill, updateStatus, updateBill, deleteBill, pendingBills, loading }
+  return { bills, addBill, updateStatus, updateBill, deleteBill, restoreBill, pendingBills, loading }
 }

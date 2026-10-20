@@ -18,5 +18,9 @@ export function useSpendings() {
     setSpendings((prev) => prev.filter((s) => s.id !== id))
   }
 
-  return { spendings, addSpending, updateSpending, deleteSpending, loading }
+  const restoreSpending = (item: Spending) => {
+    setSpendings((prev) => (prev.some((i) => i.id === item.id) ? prev : [item, ...prev]))
+  }
+
+  return { spendings, addSpending, updateSpending, deleteSpending, restoreSpending, loading }
 }

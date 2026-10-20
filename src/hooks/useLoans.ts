@@ -18,6 +18,10 @@ export function useLoans() {
     setLoans((prev) => prev.filter((l) => l.id !== id))
   }
 
+  const restoreLoan = (item: Loan) => {
+    setLoans((prev) => (prev.some((i) => i.id === item.id) ? prev : [item, ...prev]))
+  }
+
   const totalOwed = loans
     .filter((l) => l.type === 'lent' && l.status === 'pending')
     .reduce((sum, l) => sum + l.amount, 0)
@@ -26,5 +30,5 @@ export function useLoans() {
     .filter((l) => l.type === 'borrowed' && l.status === 'pending')
     .reduce((sum, l) => sum + l.amount, 0)
 
-  return { loans, addLoan, updateStatus, deleteLoan, totalOwed, totalOwing, loading }
+  return { loans, addLoan, updateStatus, deleteLoan, restoreLoan, totalOwed, totalOwing, loading }
 }
