@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { Logo } from './logo'
 import { useToast } from '../../context/ToastContext'
 import {
   LayoutDashboard,
@@ -37,13 +38,7 @@ export function Sidebar() {
     <aside className="hidden md:flex w-60 shrink-0 bg-[#393E46] min-h-screen flex-col border-r border-[#222831]">
       {/* Logo */}
       <div className="px-5 py-4 border-b border-[#222831]">
-        <div className="flex items-center gap-2.5">
-          <img src="/hootanglogo.png" alt="Hootang" className="w-8 h-8 object-contain" />
-          <div>
-            <p style={{ fontFamily: "'Syne', sans-serif" }} className="font-bold text-[#EEEEEE] leading-none text-sm tracking-wide">Hootang</p>
-            <p className="text-xs text-[#EEEEEE]/40 mt-0.5">Track. Split. Settle.</p>
-          </div>
-        </div>
+        <Logo size="md" tagline="Track. Split. Settle." />
       </div>
 
       {/* Nav */}

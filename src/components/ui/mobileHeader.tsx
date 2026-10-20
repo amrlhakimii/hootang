@@ -1,5 +1,6 @@
 import { UserMenu } from '../../features/auth/UserMenu'
 import { CreditBadge } from './creditBadge'
+import { Logo } from './logo'
 
 export function TopHeader() {
   return (
@@ -14,13 +15,7 @@ export function TopHeader() {
         borderBottom: '1px solid rgba(238,238,238,0.04)',
       }}
     >
-      <span
-        style={{ fontFamily: "'Syne', sans-serif" }}
-        className="text-xl font-extrabold tracking-tight"
-      >
-        <span style={{ color: '#00ADB5' }}>hoo</span>
-        <span className="text-[#EEEEEE]">tang</span>
-      </span>
+      <Logo size="sm" />
 
       <div className="flex items-center gap-3">
         <CreditBadge />

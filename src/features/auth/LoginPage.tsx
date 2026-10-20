@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Logo } from '../../components/ui/logo'
 import { Cloud, Smartphone, RefreshCw } from 'lucide-react'
 import { gsap } from 'gsap'
 import { useAuth } from '../../context/AuthContext'
@@ -42,12 +43,8 @@ export function LoginPage() {
       <div className="w-full max-w-sm relative" style={{ zIndex: 1 }}>
         {/* Logo */}
         <div ref={logoRef} className="text-center mb-10">
-          <h1
-            style={{ fontFamily: "'Syne', sans-serif" }}
-            className="text-4xl font-extrabold tracking-tight mb-2"
-          >
-            <span style={{ color: '#00ADB5' }}>hoo</span>
-            <span className="text-[#EEEEEE]">tang</span>
+          <h1 className="flex justify-center mb-4">
+            <Logo size="lg" stacked />
           </h1>
           <p className="text-[#EEEEEE]/35 text-sm tracking-widest uppercase">
             Track · Split · Settle
