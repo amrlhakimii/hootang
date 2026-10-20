@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Receipt, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { gsap } from 'gsap'
+import { useUndoDelete } from '../../hooks/useUndoDelete'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Button } from '../../components/layout/button'
@@ -31,7 +32,8 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
 }
 
 export function BillPage() {
-  const { bills, addBill, updateStatus, updateBill, deleteBill, pendingBills } = useBills()
+  const { bills, addBill, updateStatus, updateBill, deleteBill, restoreBill, pendingBills } = useBills()
+  const undoDelete = useUndoDelete()
   const [showModal, setShowModal] = useState(false)
   const [editingBill, setEditingBill] = useState<Bill | null>(null)
   const [activeTab, setActiveTab] = useState('all')
@@ -56,6 +58,12 @@ export function BillPage() {
   const totalPending = pendingBills.reduce((sum, b) => sum + b.amount, 0)
   const paidCount = bills.filter((b) => b.status === 'paid').length
 
+  const handleDelete = (id: string) => {
+    const bill = bills.find((b) => b.id === id)
+    if (!bill) return
+    undoDelete('Bill', () => deleteBill(id), () => restoreBill(bill), id)
+  }
+
   return (
     <PageContainer>
       <Navbar title="Bill Tracker" action={<Button onClick={() => { setEditingBill(null); setShowModal(true) }}><Plus size={15} /> Add Bill</Button>} />
@@ -79,7 +87,7 @@ export function BillPage() {
           onPay={(id) => updateStatus(id, 'paid')}
           onUnpay={(id) => updateStatus(id, 'pending')}
           onEdit={(bill) => { setEditingBill(bill); setShowModal(true) }}
-          onDelete={deleteBill}
+          onDelete={handleDelete}
         />
       </div>
 

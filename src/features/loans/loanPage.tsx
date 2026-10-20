@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, HandCoins, TrendingUp, TrendingDown } from 'lucide-react'
 import { gsap } from 'gsap'
+import { useUndoDelete } from '../../hooks/useUndoDelete'
 import { PageContainer } from '../../components/ui/pageContainer'
 import { Navbar } from '../../components/ui/navbar'
 import { Button } from '../../components/layout/button'
@@ -31,7 +32,8 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
 }
 
 export function LoanPage() {
-  const { loans, addLoan, updateStatus, deleteLoan, totalOwed, totalOwing } = useLoans()
+  const { loans, addLoan, updateStatus, deleteLoan, restoreLoan, totalOwed, totalOwing } = useLoans()
+  const undoDelete = useUndoDelete()
   const [showModal, setShowModal] = useState(false)
   const [activeTab, setActiveTab] = useState('all')
   const statsRef = useRef<HTMLDivElement>(null)
@@ -53,6 +55,12 @@ export function LoanPage() {
     return true
   })
 
+  const handleDelete = (id: string) => {
+    const loan = loans.find((l) => l.id === id)
+    if (!loan) return
+    undoDelete('Loan', () => deleteLoan(id), () => restoreLoan(loan), id)
+  }
+
   return (
     <PageContainer>
       <Navbar title="Loan Tracker" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Loan</Button>} />
@@ -69,7 +77,7 @@ export function LoanPage() {
       </div>
 
       <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(57,62,70,0.5)', border: '1px solid rgba(238,238,238,0.05)' }}>
-        <LoanTable loans={filtered} onSettle={(id) => updateStatus(id, 'settled')} onDelete={deleteLoan} />
+        <LoanTable loans={filtered} onSettle={(id) => updateStatus(id, 'settled')} onDelete={handleDelete} />
       </div>
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Add Loan">

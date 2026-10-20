@@ -38,16 +38,17 @@ export function BillTable({ bills, onPay, onUnpay, onEdit, onDelete }: BillTable
         const color = categoryColors[bill.category] || '#6b7280'
         const isPaid = bill.status === 'paid'
         return (
-          <div key={bill.id} className="flex items-center gap-3 px-4 py-3 border-b border-white/5 last:border-0">
+          <div key={bill.id} className="flex gap-3 px-4 py-3 border-b border-white/5 last:border-0">
             {/* accent bar */}
-            <div className="w-1 h-10 rounded-full shrink-0" style={{ background: isPaid ? '#6b7280' : color }} />
+            <div className="w-1 min-h-10 self-stretch rounded-full shrink-0" style={{ background: isPaid ? '#6b7280' : color }} />
 
+            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className={`font-semibold text-sm truncate ${isPaid ? 'text-[#EEEEEE]/40' : 'text-[#EEEEEE]'}`}>{bill.name}</p>
-                {bill.recurring && <RefreshCw size={10} className="text-[#00ADB5] shrink-0" />}
+              <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-0.5">
+                <p className={`font-semibold text-sm truncate max-w-full ${isPaid ? 'text-[#EEEEEE]/40' : 'text-[#EEEEEE]'}`}>{bill.name}</p>
+                {bill.recurring && <RefreshCw size={12} className="text-[#00ADB5] shrink-0" />}
                 <span
-                  className="text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0"
+                  className="text-xs font-medium px-1.5 py-0.5 rounded-full shrink-0"
                   style={{ background: isPaid ? 'rgba(74,222,128,0.1)' : 'rgba(245,158,11,0.1)', color: isPaid ? '#4ade80' : '#f59e0b' }}
                 >
                   {bill.status}
@@ -56,25 +57,26 @@ export function BillTable({ bills, onPay, onUnpay, onEdit, onDelete }: BillTable
               <p className="text-[#EEEEEE]/30 text-xs">{bill.category} · Due {formatDate(bill.dueDate)}</p>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center justify-between sm:justify-end gap-2 sm:shrink-0">
               <p className={`font-bold text-sm ${isPaid ? 'text-[#EEEEEE]/25' : 'text-red-400'}`}>{formatCurrency(bill.amount)}</p>
               <div className="flex gap-1">
                 {isPaid ? (
-                  <Button size="sm" variant="secondary" onClick={() => onUnpay(bill.id)}>
+                  <Button size="sm" variant="secondary" onClick={() => onUnpay(bill.id)} aria-label="Mark pending" className="min-h-11 min-w-11 justify-center sm:min-h-0 sm:min-w-0">
                     <Circle size={13} />
                   </Button>
                 ) : (
-                  <Button size="sm" variant="secondary" onClick={() => handlePay(bill.id)}>
+                  <Button size="sm" variant="secondary" onClick={() => handlePay(bill.id)} aria-label="Mark paid" className="min-h-11 min-w-11 justify-center sm:min-h-0 sm:min-w-0">
                     <CheckCircle size={13} />
                   </Button>
                 )}
-                <Button size="sm" variant="secondary" onClick={() => onEdit(bill)}>
+                <Button size="sm" variant="secondary" onClick={() => onEdit(bill)} aria-label="Edit bill" className="min-h-11 min-w-11 justify-center sm:min-h-0 sm:min-w-0">
                   <Pencil size={13} />
                 </Button>
-                <Button size="sm" variant="danger" onClick={() => onDelete(bill.id)}>
+                <Button size="sm" variant="danger" onClick={() => onDelete(bill.id)} aria-label="Delete bill" className="min-h-11 min-w-11 justify-center sm:min-h-0 sm:min-w-0">
                   <Trash2 size={13} />
                 </Button>
               </div>
+            </div>
             </div>
           </div>
         )

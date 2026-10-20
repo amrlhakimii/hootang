@@ -63,12 +63,12 @@ export function BillForm({ initial, onSubmit, onCancel }: BillFormProps) {
         <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
       </div>
 
-      <label className="flex items-center gap-2 cursor-pointer">
+      <label className="flex items-center gap-2 cursor-pointer min-h-11">
         <input
           type="checkbox"
           checked={recurring}
           onChange={(e) => setRecurring(e.target.checked)}
-          className="accent-[#00ADB5] w-4 h-4"
+          className="accent-[#00ADB5] w-5 h-5"
         />
         <span className="text-[#EEEEEE]/70 text-sm">Recurring bill</span>
       </label>
