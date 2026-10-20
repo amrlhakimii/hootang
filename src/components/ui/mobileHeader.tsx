@@ -24,7 +24,7 @@ export function TopHeader() {
 
       <div className="flex items-center gap-3">
         <CreditBadge />
-        <span className="text-[10px] text-[#EEEEEE]/25 tracking-widest uppercase hidden sm:block">
+        <span className="text-[11px] text-[#EEEEEE]/25 tracking-widest uppercase hidden sm:block">
           Track · Split · Settle
         </span>
         <UserMenu />

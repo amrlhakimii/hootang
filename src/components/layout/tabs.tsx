@@ -16,7 +16,7 @@ export function Tabs({ tabs, active, onChange }: TabsProps) {
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
-          className={`shrink-0 flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`shrink-0 flex-1 px-3 py-2 min-h-11 sm:min-h-0 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
             active === tab.id
               ? 'bg-[#00ADB5] text-[#222831]'
               : 'text-[#EEEEEE]/50 hover:text-[#EEEEEE]'

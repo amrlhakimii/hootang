@@ -32,7 +32,7 @@ export function BottomNav() {
           to={to}
           end={to === '/'}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[56px] py-2 text-[10px] transition-colors ${
+            `flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[56px] min-h-14 py-2 text-xs transition-colors ${
               isActive
                 ? 'text-[#00ADB5]'
                 : 'text-[#EEEEEE]/40 active:text-[#EEEEEE]'
