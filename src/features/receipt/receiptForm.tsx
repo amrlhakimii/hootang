@@ -11,6 +11,7 @@ import { type Receipt, type ReceiptItem, type SplitMode, type ReceiptCategory } 
 import { useFriends } from '../../hooks/useFriends'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { scanReceipt, fileToBase64 } from '../../utils/scanReceipt'
+import { hasInvalidCustomAmounts } from '../../utils/calculateSplit'
 import { generateID } from '../../utils/generateID'
 
 interface ReceiptFormProps {
@@ -34,6 +35,12 @@ const CATEGORIES: { value: ReceiptCategory; label: string }[] = [
   { value: 'utilities', label: '⚡ Utilities' },
   { value: 'other', label: '📦 Other' },
 ]
+
+function omitKey(obj: Record<string, number>, key: string): Record<string, number> {
+  const next = { ...obj }
+  delete next[key]
+  return next
+}
 
 export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps) {
   const { friends } = useFriends()
@@ -113,6 +120,7 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
     setItems((prev) => prev.map((item) => ({
       ...item,
       assignedTo: item.assignedTo.filter((n) => n !== name),
+      ...(item.customAmounts && { customAmounts: omitKey(item.customAmounts, name) }),
     })))
     setPercentages((prev) => {
       const next = { ...prev }
@@ -132,8 +140,25 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
               assignedTo: item.assignedTo.includes(person)
                 ? item.assignedTo.filter((n) => n !== person)
                 : [...item.assignedTo, person],
+              ...(item.customAmounts && {
+                customAmounts: item.assignedTo.includes(person)
+                  ? omitKey(item.customAmounts, person)
+                  : { ...item.customAmounts, [person]: 0 },
+              }),
             }
       )
+    )
+  }
+
+  const setCustomAmounts = (itemId: string, amounts: Record<string, number> | undefined) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== itemId) return item
+        const next = { ...item }
+        if (amounts) next.customAmounts = amounts
+        else delete next.customAmounts
+        return next
+      })
     )
   }
 
@@ -160,7 +185,8 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
   const canProceed =
     items.length > 0 &&
     participants.length > 0 &&
-    (splitMode !== 'percentage' || percentageValid)
+    (splitMode !== 'percentage' || percentageValid) &&
+    (splitMode !== 'itemized' || !hasInvalidCustomAmounts(items))
 
   if (step === 'summary') {
     return (
@@ -348,7 +374,7 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
       {splitMode === 'itemized' && participants.length > 0 && (
         <div>
           <Label>Assign Items</Label>
-          <AssignPeople items={items} participants={participants} onToggle={toggleAssign} />
+          <AssignPeople items={items} participants={participants} onToggle={toggleAssign} onSetCustomAmounts={setCustomAmounts} />
         </div>
       )}
 
@@ -369,7 +395,9 @@ export function ReceiptForm({ onSave, onCancel, initialData }: ReceiptFormProps)
         >
           {splitMode === 'percentage' && !percentageValid && participants.length > 0
             ? `${percentageTotal.toFixed(0)}% / 100%`
-            : 'Preview Split'}
+            : splitMode === 'itemized' && hasInvalidCustomAmounts(items)
+              ? 'Fix unequal amounts'
+              : 'Preview Split'}
         </Button>
       </div>
     </div>

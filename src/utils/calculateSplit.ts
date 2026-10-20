@@ -1,4 +1,4 @@
-import { type Receipt } from '../types/receipt'
+import { type Receipt, type ReceiptItem } from '../types/receipt'
 
 export interface PersonShare {
   name: string
@@ -7,6 +7,32 @@ export interface PersonShare {
   taxAmount: number
   serviceAmount: number
   total: number
+}
+
+export function getItemTotal(item: ReceiptItem): number {
+  return item.price * (item.quantity ?? 1)
+}
+
+export function getItemShares(item: ReceiptItem): Record<string, number> {
+  const shares: Record<string, number> = {}
+  if (item.assignedTo.length === 0) return shares
+  if (item.customAmounts) {
+    item.assignedTo.forEach((p) => (shares[p] = item.customAmounts?.[p] ?? 0))
+    return shares
+  }
+  const each = getItemTotal(item) / item.assignedTo.length
+  item.assignedTo.forEach((p) => (shares[p] = each))
+  return shares
+}
+
+export function getCustomAmountsDiff(item: ReceiptItem): number {
+  if (!item.customAmounts || item.assignedTo.length === 0) return 0
+  const sum = item.assignedTo.reduce((s, p) => s + (item.customAmounts?.[p] ?? 0), 0)
+  return getItemTotal(item) - sum
+}
+
+export function hasInvalidCustomAmounts(items: ReceiptItem[]): boolean {
+  return items.some((i) => Math.abs(getCustomAmountsDiff(i)) > 0.005)
 }
 
 export function calculateReceiptSplit(receipt: Omit<Receipt, 'id'>): PersonShare[] {
@@ -59,11 +85,8 @@ export function calculateReceiptSplit(receipt: Omit<Receipt, 'id'>): PersonShare
   participants.forEach((p) => (shareMap[p] = 0))
 
   items.forEach((item) => {
-    if (item.assignedTo.length === 0) return
-    const itemTotal = item.price * (item.quantity ?? 1)
-    const pricePerPerson = itemTotal / item.assignedTo.length
-    item.assignedTo.forEach((person) => {
-      if (shareMap[person] !== undefined) shareMap[person] += pricePerPerson
+    Object.entries(getItemShares(item)).forEach(([person, amount]) => {
+      if (shareMap[person] !== undefined) shareMap[person] += amount
     })
   })
 

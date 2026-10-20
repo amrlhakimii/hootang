@@ -4,6 +4,7 @@ export interface ReceiptItem {
   price: number
   quantity: number
   assignedTo: string[]
+  customAmounts?: Record<string, number> // set = unequal split, per-person amount for the whole item
 }
 
 export type SplitMode = 'equal' | 'itemized' | 'percentage'
