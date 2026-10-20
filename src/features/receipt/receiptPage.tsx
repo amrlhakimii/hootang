@@ -92,7 +92,7 @@ export function ReceiptPage() {
         <EmptyState icon={<UtensilsCrossed size={28} />} title="No receipts yet" description="Split your next meal with friends — no awkward math" />
       ) : (
         <div className="space-y-3 pb-24">
-          {receipts.map((receipt) => {
+          {[...receipts].sort((a, b) => b.date.localeCompare(a.date)).map((receipt) => {
             const rawSubtotal = receipt.items.reduce((sum, i) => sum + i.price * (i.quantity ?? 1), 0)
             const discountAmt = Math.min(receipt.discount ?? 0, rawSubtotal)
             const subtotal = rawSubtotal - discountAmt
