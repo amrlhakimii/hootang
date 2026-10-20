@@ -71,15 +71,15 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-2">
-        <Button variant="secondary" size="sm" onClick={onEdit}>
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="secondary" size="sm" onClick={onEdit} className="min-h-11">
           <Pencil size={14} /> Edit
         </Button>
-        <Button variant="secondary" size="sm" onClick={handleShare} disabled={sharing}>
+        <Button variant="secondary" size="sm" onClick={handleShare} disabled={sharing} className="min-h-11">
           {sharing ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
           {sharing ? 'Generating…' : 'Share'}
         </Button>
-        <Button variant="secondary" size="sm" onClick={() => generateReceiptPDF(receipt, { qrDataUrl: qr })}>
+        <Button variant="secondary" size="sm" onClick={() => generateReceiptPDF(receipt, { qrDataUrl: qr })} className="min-h-11">
           <FileDown size={14} /> PDF
         </Button>
       </div>
@@ -109,19 +109,19 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
             const total = item.price * qty
             return (
               <div key={item.id} className="px-4 py-3">
-                <div className="flex justify-between items-center">
-                  <div>
+                <div className="flex justify-between items-center gap-3">
+                  <div className="min-w-0 break-words">
                     <span className="text-[#EEEEEE] text-sm">{item.name}</span>
                     {qty > 1 && (
                       <span className="text-[#EEEEEE]/40 text-xs ml-2">{qty} × {formatCurrency(item.price)}</span>
                     )}
                   </div>
-                  <span className="text-[#EEEEEE]/70 text-sm">{formatCurrency(total)}</span>
+                  <span className="text-[#EEEEEE]/70 text-sm shrink-0">{formatCurrency(total)}</span>
                 </div>
                 {receipt.splitMode === 'itemized' && item.assignedTo.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {item.assignedTo.map((p) => (
-                      <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-white/6 text-[#EEEEEE]/40">
+                      <span key={p} className="text-xs px-2 py-0.5 rounded-full bg-white/6 text-[#EEEEEE]/50">
                         {p}{item.customAmounts ? ` · ${formatCurrency(item.customAmounts[p] ?? 0)}` : ''}
                       </span>
                     ))}
@@ -176,16 +176,16 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
             return (
               <div
                 key={share.name}
-                className={`flex items-center justify-between rounded-xl px-4 py-3 transition-all ${settled ? 'bg-[#222831]/50' : 'bg-[#222831]'}`}
+                className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3 transition-all ${settled ? 'bg-[#222831]/50' : 'bg-[#222831]'}`}
               >
-                <div className="flex-1">
-                  <p className={`font-medium text-sm ${settled ? 'line-through text-[#EEEEEE]/30' : 'text-[#EEEEEE]'}`}>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-medium break-words text-sm ${settled ? 'line-through text-[#EEEEEE]/30' : 'text-[#EEEEEE]'}`}>
                     {share.name}
                   </p>
                   {isPayer && <p className="text-[#00ADB5]/70 text-xs">paid upfront</p>}
                   {!isPayer && receipt.paidBy && <p className="text-[#EEEEEE]/30 text-xs">owes {receipt.paidBy}</p>}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 shrink-0">
                   <p className={`font-bold ${settled ? 'text-[#EEEEEE]/30' : 'text-[#00ADB5]'}`}>
                     {formatCurrency(share.total)}
                   </p>
@@ -194,13 +194,16 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
                       type="button"
                       onClick={() => toggleSettle(share.name)}
                       title={settled ? 'Mark as unpaid' : 'Mark as settled'}
-                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                      aria-label={settled ? `Mark ${share.name} as unpaid` : `Mark ${share.name} as settled`}
+                      className="w-11 h-11 flex items-center justify-center cursor-pointer group"
+                    >
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                         settled
                           ? 'bg-green-500 text-white'
-                          : 'bg-[#393E46] text-[#EEEEEE]/40 hover:text-[#EEEEEE]'
-                      }`}
-                    >
-                      <Check size={12} />
+                          : 'bg-[#393E46] text-[#EEEEEE]/40 group-hover:text-[#EEEEEE]'
+                      }`}>
+                        <Check size={12} />
+                      </span>
                     </button>
                   )}
                 </div>
@@ -211,8 +214,8 @@ export function ReceiptDetail({ receipt, onUpdate, onEdit }: ReceiptDetailProps)
       </div>
 
       {qr && (
-        <div className="bg-[#222831] rounded-xl p-3 flex items-center gap-4">
-          <img src={qr} alt="DuitNow QR" className="w-24 h-24 rounded-lg bg-white p-1 object-contain shrink-0" />
+        <div className="bg-[#222831] rounded-xl p-3 flex items-center gap-3 sm:gap-4">
+          <img src={qr} alt="DuitNow QR" className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-white p-1 object-contain shrink-0" />
           <div>
             <p className="text-[#EEEEEE] text-sm font-semibold">Pay via DuitNow</p>
             <p className="text-[#EEEEEE]/40 text-xs mt-0.5">Included in the PDF and shared file.</p>

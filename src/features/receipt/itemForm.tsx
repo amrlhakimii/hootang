@@ -31,9 +31,10 @@ export function ItemForm({ onAdd }: ItemFormProps) {
   }
 
   return (
-    <div className="flex gap-2">
-      <div className="flex-1">
+    <div className="flex flex-wrap sm:flex-nowrap gap-2">
+      <div className="basis-full sm:basis-0 sm:flex-1">
         <Input
+          className="min-h-11"
           ref={nameRef}
           placeholder="Item name"
           value={name}
@@ -41,8 +42,9 @@ export function ItemForm({ onAdd }: ItemFormProps) {
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
         />
       </div>
-      <div className="w-16">
+      <div className="flex-1 sm:flex-none sm:w-16">
         <Input
+          className="min-h-11"
           type="number"
           min="1"
           step="1"
@@ -52,8 +54,9 @@ export function ItemForm({ onAdd }: ItemFormProps) {
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
         />
       </div>
-      <div className="w-28">
+      <div className="flex-1 sm:flex-none sm:w-28">
         <Input
+          className="min-h-11"
           type="number"
           min="0.01"
           step="0.01"
@@ -63,7 +66,7 @@ export function ItemForm({ onAdd }: ItemFormProps) {
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
         />
       </div>
-      <Button type="button" onClick={handleAdd} variant="secondary">
+      <Button type="button" onClick={handleAdd} variant="secondary" aria-label="Add item" className="min-h-11 min-w-11 justify-center">
         <Plus size={14} />
       </Button>
     </div>

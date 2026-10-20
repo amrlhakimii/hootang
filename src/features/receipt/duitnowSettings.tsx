@@ -94,10 +94,10 @@ export function DuitNowSettings({ isOpen, onClose }: DuitNowSettingsProps) {
                   className="w-32 h-32 rounded-xl bg-white p-1.5 object-contain"
                 />
                 <div className="flex flex-col gap-2">
-                  <Button size="sm" variant="secondary" disabled={busy} onClick={() => fileRef.current?.click()}>
+                  <Button size="sm" variant="secondary" disabled={busy} className="min-h-11" onClick={() => fileRef.current?.click()}>
                     <ImagePlus size={14} /> Replace
                   </Button>
-                  <Button size="sm" variant="danger" disabled={busy} onClick={handleRemove}>
+                  <Button size="sm" variant="danger" disabled={busy} className="min-h-11" onClick={handleRemove}>
                     <Trash2 size={14} /> Remove
                   </Button>
                 </div>
@@ -121,7 +121,7 @@ export function DuitNowSettings({ isOpen, onClose }: DuitNowSettingsProps) {
                 <p className="text-red-300 text-xs">
                   Couldn't find a QR in that image. Try a clearer or closer screenshot, or crop it to the QR yourself.
                 </p>
-                <Button size="sm" variant="secondary" disabled={busy} onClick={handleUseWholeImage}>
+                <Button size="sm" variant="secondary" disabled={busy} className="min-h-11" onClick={handleUseWholeImage}>
                   Use the whole image anyway
                 </Button>
               </div>
@@ -140,6 +140,7 @@ export function DuitNowSettings({ isOpen, onClose }: DuitNowSettingsProps) {
             <div className="flex gap-2">
               <Input
                 id="myName"
+                className="min-h-11"
                 list="friend-names"
                 value={name}
                 placeholder="e.g. Kimi"
@@ -150,6 +151,7 @@ export function DuitNowSettings({ isOpen, onClose }: DuitNowSettingsProps) {
               </datalist>
               <Button
                 type="button"
+                className="min-h-11 shrink-0"
                 disabled={nameDraft === null || nameDraft.trim() === (profile.myName ?? '')}
                 onClick={handleSaveName}
               >

@@ -24,7 +24,7 @@ function AmountInput({ value, onChange }: { value: number; onChange: (n: number)
         setText(e.target.value)
         onChange(Math.max(0, parseFloat(e.target.value) || 0))
       }}
-      className="w-20 bg-[#393E46] text-[#EEEEEE] text-xs rounded-lg px-2 py-1 text-right outline-none focus:ring-1 focus:ring-[#00ADB5]"
+      className="w-24 min-h-11 bg-[#393E46] text-[#EEEEEE] text-sm rounded-lg px-2 py-1 text-right outline-none focus:ring-1 focus:ring-[#00ADB5]"
     />
   )
 }
@@ -47,16 +47,16 @@ export function AssignPeople({ items, participants, onToggle, onSetCustomAmounts
         const diff = getCustomAmountsDiff(item)
         return (
           <div key={item.id} className="bg-[#222831] rounded-xl p-3">
-            <div className="flex items-center justify-between mb-2">
-              <div>
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="min-w-0 break-words">
                 <p className="text-[#EEEEEE] text-sm font-medium">{item.name}</p>
                 {qty > 1 && (
                   <p className="text-[#EEEEEE]/40 text-xs">{qty} × {formatCurrency(item.price)}</p>
                 )}
               </div>
-              <p className="text-[#00ADB5] text-sm font-semibold">{formatCurrency(itemTotal)}</p>
+              <p className="text-[#00ADB5] text-sm font-semibold shrink-0">{formatCurrency(itemTotal)}</p>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-x-1.5 gap-y-4 py-1">
               {participants.map((person) => {
                 const assigned = item.assignedTo.includes(person)
                 return (
@@ -64,7 +64,7 @@ export function AssignPeople({ items, participants, onToggle, onSetCustomAmounts
                     key={person}
                     type="button"
                     onClick={() => onToggle(item.id, person)}
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                    className={`relative px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer before:absolute before:-inset-x-0.5 before:-inset-y-2 before:content-[''] ${
                       assigned
                         ? 'bg-[#00ADB5] text-[#222831]'
                         : 'bg-[#393E46] text-[#EEEEEE]/50 hover:text-[#EEEEEE]'
@@ -86,7 +86,7 @@ export function AssignPeople({ items, participants, onToggle, onSetCustomAmounts
                 onClick={() =>
                   onSetCustomAmounts(item.id, item.customAmounts ? undefined : splitEvenly(itemTotal, item.assignedTo))
                 }
-                className="mt-2 text-xs text-[#00ADB5] hover:underline cursor-pointer"
+                className="mt-1 min-h-11 inline-flex items-center text-xs text-[#00ADB5] hover:underline cursor-pointer"
               >
                 {item.customAmounts ? 'Split equally' : 'Split unequally'}
               </button>
@@ -94,9 +94,9 @@ export function AssignPeople({ items, participants, onToggle, onSetCustomAmounts
             {item.customAmounts && item.assignedTo.length > 0 && (
               <div className="mt-2 space-y-1.5">
                 {item.assignedTo.map((person) => (
-                  <div key={person} className="flex items-center justify-between">
-                    <span className="text-[#EEEEEE]/70 text-xs">{person}</span>
-                    <div className="flex items-center gap-1 text-[#EEEEEE]/40 text-xs">
+                  <div key={person} className="flex items-center justify-between gap-2">
+                    <span className="text-[#EEEEEE]/70 text-xs min-w-0 break-words">{person}</span>
+                    <div className="flex items-center gap-1 text-[#EEEEEE]/40 text-xs shrink-0">
                       RM
                       <AmountInput
                         value={item.customAmounts?.[person] ?? 0}

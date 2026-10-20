@@ -48,8 +48,8 @@ export function SplitSummary({ receipt }: SplitSummaryProps) {
 
       <div className="space-y-2">
         {shares.map((share) => (
-          <div key={share.name} className="flex items-center justify-between bg-[#222831] rounded-xl px-4 py-3">
-            <div>
+          <div key={share.name} className="flex items-center justify-between gap-3 bg-[#222831] rounded-xl px-4 py-3">
+            <div className="min-w-0 break-words">
               <p className="text-[#EEEEEE] font-medium text-sm">{share.name}</p>
               {receipt.paidBy && receipt.paidBy !== share.name && (
                 <p className="text-[#EEEEEE]/40 text-xs">owes {receipt.paidBy}</p>
@@ -58,7 +58,7 @@ export function SplitSummary({ receipt }: SplitSummaryProps) {
                 <p className="text-[#00ADB5]/70 text-xs">paid upfront</p>
               )}
             </div>
-            <p className="text-[#00ADB5] font-bold">{formatCurrency(share.total)}</p>
+            <p className="text-[#00ADB5] font-bold shrink-0">{formatCurrency(share.total)}</p>
           </div>
         ))}
       </div>
