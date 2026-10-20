@@ -128,7 +128,6 @@ export function DashboardPage() {
       tl.kill()
       gsap.set([...actions, ...chips], { clearProps: 'all' })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -157,7 +156,7 @@ export function DashboardPage() {
 
       {/* Quick actions */}
       <div className="mb-5">
-        <p className="text-[#EEEEEE]/30 text-[10px] font-semibold uppercase tracking-widest mb-3">Quick actions</p>
+        <p className="text-[#EEEEEE]/30 text-[11px] font-semibold uppercase tracking-widest mb-3">Quick actions</p>
         <div ref={actionsRef} className="grid grid-cols-4 gap-2">
           {quickActions.map((action) => (
             <button
@@ -171,7 +170,7 @@ export function DashboardPage() {
             >
               <span className="text-2xl leading-none">{action.emoji}</span>
               <span
-                className="text-[10px] font-semibold leading-tight text-center px-1"
+                className="text-xs font-semibold leading-tight text-center px-1 break-words max-w-full"
                 style={{ color: `${action.color}cc` }}
               >
                 {action.label}

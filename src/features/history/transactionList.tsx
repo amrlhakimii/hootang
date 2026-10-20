@@ -56,9 +56,9 @@ export function TransactionList({ loans, bills, subscriptions, receipts, filter 
 
             <div className="flex-1 min-w-0">
               <p className="text-[#EEEEEE] text-sm font-medium truncate">{item.description}</p>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-x-2 gap-y-0.5 flex-wrap mt-0.5">
                 <p className="text-[#EEEEEE]/30 text-xs">{formatDate(item.date)}</p>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: `${color}18`, color }}>{item.category}</span>
+                <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: `${color}18`, color }}>{item.category}</span>
                 <span className="text-[#EEEEEE]/20 text-xs">{item.meta}</span>
               </div>
             </div>

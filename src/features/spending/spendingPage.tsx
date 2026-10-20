@@ -16,6 +16,7 @@ import { useSubscriptions } from '../../hooks/useSubscription'
 import { useReceipts } from '../../hooks/useReceipt'
 import { useSpendings } from '../../hooks/useSpending'
 import { useBudgets } from '../../hooks/useBudgets'
+import { useUndoDelete } from '../../hooks/useUndoDelete'
 import { useAuth } from '../../context/AuthContext'
 import { type Spending, type PaymentMethod } from '../../types/spending'
 import { type Bill } from '../../types/bill'
@@ -24,6 +25,8 @@ import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate, getCurrentMonth, formatMonth, toDateKey, monthKeyOf, addDays, recurDateInMonth } from '../../utils/formatDate'
 import { getCostPerPerson } from '../../utils/calculateSubscription'
 import { calculateReceiptSplit } from '../../utils/calculateSplit'
+
+const iconBtn = 'flex items-center justify-center w-11 h-11 sm:w-auto sm:h-auto -my-2 sm:my-0 transition-colors cursor-pointer text-[#EEEEEE]/25'
 
 const categoryColors: Record<string, string> = {
   rent: '#8b5cf6',
@@ -105,11 +108,12 @@ export function SpendingPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const ME = (user?.displayName ?? '').trim().toLowerCase()
-  const { bills, updateBill, deleteBill, loading: billsLoading } = useBills()
-  const { subscriptions, updateSubscription, deleteSubscription, loading: subsLoading } = useSubscriptions()
-  const { receipts, deleteReceipt, loading: receiptsLoading } = useReceipts()
-  const { spendings, addSpending, updateSpending, deleteSpending, loading: spendingsLoading } = useSpendings()
+  const { bills, updateBill, deleteBill, restoreBill, loading: billsLoading } = useBills()
+  const { subscriptions, updateSubscription, deleteSubscription, restoreSubscription, loading: subsLoading } = useSubscriptions()
+  const { receipts, deleteReceipt, restoreReceipt, loading: receiptsLoading } = useReceipts()
+  const { spendings, addSpending, updateSpending, deleteSpending, restoreSpending, loading: spendingsLoading } = useSpendings()
   const { budgets, setBudget, loading: budgetsLoading } = useBudgets()
+  const undoDelete = useUndoDelete()
   const dataLoading = billsLoading || subsLoading || receiptsLoading || spendingsLoading || budgetsLoading
 
   const [month, setMonth] = useState(getCurrentMonth())
@@ -278,15 +282,15 @@ export function SpendingPage() {
 
       <div ref={statsRef} className="flex flex-col sm:grid sm:grid-cols-3 gap-2 sm:gap-3 mb-6">
         <div className="rounded-2xl p-3 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 min-w-0" style={{ background: 'linear-gradient(145deg, #f8717118 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #f8717125' }}>
-          <p className="text-[#EEEEEE]/40 text-xs sm:text-[10px] font-medium order-1 sm:order-2 sm:mt-1">Today</p>
+          <p className="text-[#EEEEEE]/40 text-xs font-medium order-1 sm:order-2 sm:mt-1">Today</p>
           <p style={{ fontFamily: "'Syne', sans-serif", color: '#f87171' }} className="text-lg sm:text-base md:text-xl font-extrabold leading-none order-2 sm:order-1">{formatCurrency(todayTotal)}</p>
         </div>
         <div className="rounded-2xl p-3 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 min-w-0" style={{ background: 'linear-gradient(145deg, #00ADB518 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #00ADB525' }}>
-          <p className="text-[#EEEEEE]/40 text-xs sm:text-[10px] font-medium order-1 sm:order-2 sm:mt-1">This week</p>
+          <p className="text-[#EEEEEE]/40 text-xs font-medium order-1 sm:order-2 sm:mt-1">This week</p>
           <p style={{ fontFamily: "'Syne', sans-serif", color: '#00ADB5' }} className="text-lg sm:text-base md:text-xl font-extrabold leading-none order-2 sm:order-1">{formatCurrency(weekTotal)}</p>
         </div>
         <div className="rounded-2xl p-3 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 min-w-0" style={{ background: 'linear-gradient(145deg, #8b5cf618 0%, rgba(57,62,70,0.5) 100%)', border: '1px solid #8b5cf625' }}>
-          <p className="text-[#EEEEEE]/40 text-xs sm:text-[10px] font-medium order-1 sm:order-2 sm:mt-1">This month</p>
+          <p className="text-[#EEEEEE]/40 text-xs font-medium order-1 sm:order-2 sm:mt-1">This month</p>
           <p style={{ fontFamily: "'Syne', sans-serif", color: '#8b5cf6' }} className="text-lg sm:text-base md:text-xl font-extrabold leading-none order-2 sm:order-1">{formatCurrency(total)}</p>
         </div>
       </div>
@@ -294,7 +298,7 @@ export function SpendingPage() {
       <div className="rounded-2xl p-4 mb-6" style={{ background: 'rgba(57,62,70,0.5)', border: '1px solid rgba(238,238,238,0.05)' }}>
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp size={14} className="text-[#EEEEEE]/30" />
-          <p className="text-[#EEEEEE]/40 text-[10px] font-semibold uppercase tracking-widest">Last 14 days</p>
+          <p className="text-[#EEEEEE]/40 text-[11px] font-semibold uppercase tracking-widest">Last 14 days</p>
         </div>
         <div className="flex items-end justify-between gap-1 h-20">
           {trend.map((t) => {
@@ -315,20 +319,20 @@ export function SpendingPage() {
           })}
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[9px] text-[#EEEEEE]/25 font-medium">{formatDate(trend[0].date)}</span>
-          <span className="text-[9px] text-[#EEEEEE]/25 font-medium">Today</span>
+          <span className="text-xs text-[#EEEEEE]/40 font-medium">{formatDate(trend[0].date)}</span>
+          <span className="text-xs text-[#EEEEEE]/40 font-medium">Today</span>
         </div>
       </div>
 
       <div className="flex items-center justify-between mb-6 rounded-2xl px-4 py-3" style={{ background: 'rgba(57,62,70,0.5)', border: '1px solid rgba(238,238,238,0.05)' }}>
-        <button onClick={() => setMonth((m) => shiftMonth(m, -1))} className="p-1.5 rounded-lg text-[#EEEEEE]/50 hover:text-[#EEEEEE] hover:bg-white/5 cursor-pointer">
+        <button onClick={() => setMonth((m) => shiftMonth(m, -1))} className="w-11 h-11 flex items-center justify-center -my-2 rounded-lg text-[#EEEEEE]/50 hover:text-[#EEEEEE] hover:bg-white/5 cursor-pointer">
           <ChevronLeft size={18} />
         </button>
         <p style={{ fontFamily: "'Syne', sans-serif" }} className="font-bold text-[#EEEEEE] text-sm">{formatMonth(month)}</p>
         <button
           onClick={() => setMonth((m) => shiftMonth(m, 1))}
           disabled={month >= getCurrentMonth()}
-          className="p-1.5 rounded-lg text-[#EEEEEE]/50 hover:text-[#EEEEEE] hover:bg-white/5 cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+          className="w-11 h-11 flex items-center justify-center -my-2 rounded-lg text-[#EEEEEE]/50 hover:text-[#EEEEEE] hover:bg-white/5 cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
         >
           <ChevronRight size={18} />
         </button>
@@ -356,7 +360,7 @@ export function SpendingPage() {
           </div>
 
           <div className="rounded-2xl p-4 mb-6" style={{ background: 'rgba(57,62,70,0.5)', border: '1px solid rgba(238,238,238,0.05)' }}>
-            <p className="text-[#EEEEEE]/40 text-[10px] font-semibold uppercase tracking-widest mb-3">By category</p>
+            <p className="text-[#EEEEEE]/40 text-[11px] font-semibold uppercase tracking-widest mb-3">By category</p>
             <div className="space-y-3">
               {byCategory.map(({ category, amount }) => {
                 const limit = budgets.find((b) => b.category === category)?.limit
@@ -374,7 +378,8 @@ export function SpendingPage() {
                         </span>
                         <button
                           onClick={() => { setBudgetCategory(category); setBudgetInput(limit != null ? String(limit) : '') }}
-                          className="text-[#EEEEEE]/20 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                          aria-label="Set budget"
+                          className="relative text-[#EEEEEE]/30 hover:text-[#00ADB5] transition-colors cursor-pointer before:absolute before:-inset-4 before:content-['']"
                           title="Set budget"
                         >
                           <Target size={12} />
@@ -393,11 +398,11 @@ export function SpendingPage() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <CalendarDays size={14} className="text-[#EEEEEE]/30" />
-              <p className="text-[#EEEEEE]/40 text-[10px] font-semibold uppercase tracking-widest">Statement</p>
+              <p className="text-[#EEEEEE]/40 text-[11px] font-semibold uppercase tracking-widest">Statement</p>
             </div>
             <button
               onClick={() => setShowFilters((v) => !v)}
-              className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest cursor-pointer transition-colors"
+              className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-widest cursor-pointer transition-colors relative before:absolute before:-inset-x-2 before:-inset-y-3 before:content-['']"
               style={{ color: showFilters || isFiltering ? '#00ADB5' : 'rgba(238,238,238,0.4)' }}
             >
               <SlidersHorizontal size={12} /> Filter{isFiltering ? ` (${dayGroups.reduce((s, g) => s + g.list.length, 0)})` : ''}
@@ -406,21 +411,21 @@ export function SpendingPage() {
 
           {showFilters && (
             <div className="flex gap-2 mb-4">
-              <div className="relative flex-1">
+              <div className="relative flex-1 min-w-0">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#EEEEEE]/30" />
                 <Input
                   placeholder="Search description or category"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 pr-10"
                 />
                 {search && (
-                  <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#EEEEEE]/30 hover:text-[#EEEEEE] cursor-pointer">
+                  <button onClick={() => setSearch('')} aria-label="Clear search" className="absolute right-0 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center text-[#EEEEEE]/30 hover:text-[#EEEEEE] cursor-pointer">
                     <X size={14} />
                   </button>
                 )}
               </div>
-              <Select value={filterMethod} onChange={(e) => setFilterMethod(e.target.value as 'all' | PaymentMethod)} className="w-40 shrink-0">
+              <Select value={filterMethod} onChange={(e) => setFilterMethod(e.target.value as 'all' | PaymentMethod)} className="w-32 sm:w-40 shrink-0">
                 <option value="all">All methods</option>
                 <option value="cash">Cash</option>
                 <option value="card">Card</option>
@@ -453,14 +458,15 @@ export function SpendingPage() {
                             <p className="text-[#EEEEEE] text-sm font-medium truncate">{item.description}</p>
                           </div>
                           <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ background: `${color}18`, color }}>{item.category}</span>
+                            <span className="text-xs px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ background: `${color}18`, color }}>{item.category}</span>
                             {paymentLabel(item.paymentMethod, item.shopeeMethod) && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-white/5 text-[#EEEEEE]/40">{paymentLabel(item.paymentMethod, item.shopeeMethod)}</span>
+                              <span className="text-xs px-1.5 py-0.5 rounded-full font-medium bg-white/5 text-[#EEEEEE]/40">{paymentLabel(item.paymentMethod, item.shopeeMethod)}</span>
                             )}
                           </div>
                         </div>
-                        <p className="font-bold text-sm shrink-0 text-red-400">{formatCurrency(item.amount)}</p>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex flex-col items-end sm:flex-row sm:items-center gap-1 sm:gap-3 shrink-0">
+                        <p className="font-bold text-sm text-red-400">{formatCurrency(item.amount)}</p>
+                        <div className="flex items-center gap-0 sm:gap-2 -mr-3 sm:mr-0">
                           {item.source === 'manual' && (
                             <>
                               <button
@@ -468,11 +474,18 @@ export function SpendingPage() {
                                   const original = spendings.find((s) => s.id === item.id)
                                   if (original) { setEditingSpending(original); setShowModal(true) }
                                 }}
-                                className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                                className={`${iconBtn} hover:text-[#00ADB5]`}
                               >
                                 <Pencil size={14} />
                               </button>
-                              <button onClick={() => deleteSpending(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <button
+                                aria-label="Delete"
+                                onClick={() => {
+                                const original = spendings.find((s) => s.id === item.id)
+                                if (original) undoDelete(original.description || 'Spending', () => deleteSpending(original.id), () => restoreSpending(original), original.id)
+                                }}
+                                className={`${iconBtn} hover:text-red-400`}
+                              >
                                 <Trash2 size={14} />
                               </button>
                             </>
@@ -484,11 +497,18 @@ export function SpendingPage() {
                                   const original = bills.find((b) => b.id === item.id)
                                   if (original) setEditingBill(original)
                                 }}
-                                className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                                className={`${iconBtn} hover:text-[#00ADB5]`}
                               >
                                 <Pencil size={14} />
                               </button>
-                              <button onClick={() => deleteBill(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <button
+                                aria-label="Delete"
+                                onClick={() => {
+                                const original = bills.find((b) => b.id === item.id)
+                                if (original) undoDelete(original.name, () => deleteBill(original.id), () => restoreBill(original), original.id)
+                                }}
+                                className={`${iconBtn} hover:text-red-400`}
+                              >
                                 <Trash2 size={14} />
                               </button>
                             </>
@@ -500,25 +520,40 @@ export function SpendingPage() {
                                   const original = subscriptions.find((s) => s.id === item.id)
                                   if (original) setEditingSubscription(original)
                                 }}
-                                className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer"
+                                className={`${iconBtn} hover:text-[#00ADB5]`}
                               >
                                 <Pencil size={14} />
                               </button>
-                              <button onClick={() => deleteSubscription(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <button
+                                aria-label="Delete"
+                                onClick={() => {
+                                const original = subscriptions.find((x) => x.id === item.id)
+                                if (original) undoDelete(original.name, () => deleteSubscription(original.id), () => restoreSubscription(original), original.id)
+                                }}
+                                className={`${iconBtn} hover:text-red-400`}
+                              >
                                 <Trash2 size={14} />
                               </button>
                             </>
                           )}
                           {item.source === 'receipt' && (
                             <>
-                              <button onClick={() => navigate('/receipt')} className="text-[#EEEEEE]/25 hover:text-[#00ADB5] transition-colors cursor-pointer">
+                              <button aria-label="Open receipt" onClick={() => navigate('/receipt')} className={`${iconBtn} hover:text-[#00ADB5]`}>
                                 <ExternalLink size={14} />
                               </button>
-                              <button onClick={() => deleteReceipt(item.id)} className="text-[#EEEEEE]/25 hover:text-red-400 transition-colors cursor-pointer">
+                              <button
+                                aria-label="Delete"
+                                onClick={() => {
+                                const original = receipts.find((r) => r.id === item.id)
+                                if (original) undoDelete(original.title, () => deleteReceipt(original.id), () => restoreReceipt(original), original.id)
+                                }}
+                                className={`${iconBtn} hover:text-red-400`}
+                              >
                                 <Trash2 size={14} />
                               </button>
                             </>
                           )}
+                        </div>
                         </div>
                       </div>
                     )

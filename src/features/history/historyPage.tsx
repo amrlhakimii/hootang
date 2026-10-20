@@ -64,7 +64,7 @@ export function HistoryPage() {
             }}
           >
             <p style={{ fontFamily: "'Syne', sans-serif", color: categoryColors[cat] }} className="text-xl font-extrabold leading-none mb-1">{counts[cat]}</p>
-            <p className="text-[#EEEEEE]/35 text-[10px] capitalize">{cat}s</p>
+            <p className="text-[#EEEEEE]/50 text-xs capitalize truncate">{cat}s</p>
           </button>
         ))}
       </div>

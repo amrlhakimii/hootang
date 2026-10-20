@@ -101,14 +101,14 @@ export function ActivityCard({ spendings, bills }: ActivityCardProps) {
                 className="flex items-center justify-between px-3 py-2.5 rounded-xl"
                 style={{ background: 'rgba(34,40,49,0.5)' }}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-1.5 h-8 rounded-full shrink-0 bg-yellow-400" />
-                  <div>
-                    <p className="text-[#EEEEEE] text-sm font-medium leading-none mb-0.5">{bill.name}</p>
+                  <div className="min-w-0">
+                    <p className="text-[#EEEEEE] text-sm font-medium leading-none mb-0.5 truncate">{bill.name}</p>
                     <p className="text-[#EEEEEE]/30 text-xs">Due {formatDate(bill.dueDate)}</p>
                   </div>
                 </div>
-                <p className="text-yellow-400 text-sm font-bold">{formatCurrency(bill.amount)}</p>
+                <p className="text-yellow-400 text-sm font-bold shrink-0 ml-2">{formatCurrency(bill.amount)}</p>
               </div>
             ))}
           </div>

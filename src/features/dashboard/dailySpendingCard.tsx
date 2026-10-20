@@ -78,7 +78,7 @@ export function DailySpendingCard({ today, week, month }: DailySpendingCardProps
             style={{ background: 'rgba(255,255,255,0.12)' }}
           >
             <Flame size={11} className="text-orange-300" />
-            <span className="text-[10px] font-bold uppercase tracking-wide text-orange-300">spent</span>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-orange-300">spent</span>
           </div>
         </div>
 
