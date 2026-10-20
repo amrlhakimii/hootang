@@ -35,7 +35,7 @@ export function RandomPicker({ names, onAdd, onRemove }: RandomPickerProps) {
                 key={f.id}
                 type="button"
                 onClick={() => names.includes(f.name) ? onRemove(f.name) : onAdd(f.name)}
-                className={`px-3 py-1.5 rounded-xl text-sm transition-all cursor-pointer ${
+                className={`px-3 py-2.5 min-h-11 rounded-xl text-sm transition-all cursor-pointer ${
                   names.includes(f.name)
                     ? 'bg-[#00ADB5] text-[#222831] font-medium'
                     : 'bg-[#222831] text-[#EEEEEE]/50 hover:text-[#EEEEEE]'
@@ -58,7 +58,7 @@ export function RandomPicker({ names, onAdd, onRemove }: RandomPickerProps) {
             onChange={(e) => setCustom(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustom() } }}
           />
-          <Button type="button" variant="secondary" onClick={handleAddCustom}>
+          <Button type="button" variant="secondary" className="min-w-11 min-h-11 justify-center" aria-label="Add name" onClick={handleAddCustom}>
             <Plus size={14} />
           </Button>
         </div>
@@ -76,7 +76,7 @@ export function RandomPicker({ names, onAdd, onRemove }: RandomPickerProps) {
                 style={{ backgroundColor: `${avatarColors[i % avatarColors.length]}25`, color: avatarColors[i % avatarColors.length] }}
               >
                 {name}
-                <button type="button" onClick={() => onRemove(name)} className="cursor-pointer opacity-60 hover:opacity-100">
+                <button type="button" aria-label={`Remove ${name}`} onClick={() => onRemove(name)} className="relative cursor-pointer opacity-60 hover:opacity-100 before:absolute before:-inset-3 before:content-['']">
                   <X size={12} />
                 </button>
               </span>

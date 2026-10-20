@@ -7,11 +7,13 @@ import { Button } from '../../components/layout/button'
 import { Modal } from '../../components/layout/modal'
 import { FriendsForm } from './friendsForm'
 import { FriendsList } from './friendsList'
+import { useUndoDelete } from '../../hooks/useUndoDelete'
 import { useFriends } from '../../hooks/useFriends'
 import { type Friend } from '../../types/friend'
 
 export function FriendsPage() {
-  const { friends, addFriend, updateFriend, deleteFriend } = useFriends()
+  const { friends, addFriend, updateFriend, deleteFriend, restoreFriend } = useFriends()
+  const undoDelete = useUndoDelete()
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<Friend | null>(null)
   const countRef = useRef<HTMLParagraphElement>(null)
@@ -36,7 +38,7 @@ export function FriendsPage() {
 
   return (
     <PageContainer>
-      <Navbar title="Friends" action={<Button onClick={() => setShowModal(true)}><Plus size={15} /> Add Friend</Button>} />
+      <Navbar title="Friends" action={<Button className="min-h-11" onClick={() => setShowModal(true)}><Plus size={15} /> Add Friend</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Your go-to people for splitting everything.</p>
 
       {/* friend count stat */}
@@ -53,7 +55,11 @@ export function FriendsPage() {
       <FriendsList
         friends={friends}
         onEdit={(f) => { setEditing(f); setShowModal(true) }}
-        onDelete={deleteFriend}
+        onDelete={(id) => {
+          const item = friends.find((f) => f.id === id)
+          if (!item) return
+          undoDelete('Friend', () => deleteFriend(id), () => restoreFriend(item), id)
+        }}
       />
 
       <Modal isOpen={showModal} onClose={handleClose} title={editing ? 'Edit Friend' : 'Add Friend'}>

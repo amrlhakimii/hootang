@@ -30,8 +30,8 @@ export function FriendsForm({ initial, onSubmit, onCancel }: FriendsFormProps) {
         <Textarea id="notes" rows={2} placeholder="Optional note (e.g. roommate, colleague)" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
       <div className="flex gap-2">
-        <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>
-        <Button type="submit" className="flex-1">{initial ? 'Update' : 'Add Friend'}</Button>
+        <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 min-h-11 justify-center">Cancel</Button>
+        <Button type="submit" className="flex-1 min-h-11 justify-center">{initial ? 'Update' : 'Add Friend'}</Button>
       </div>
     </form>
   )

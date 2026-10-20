@@ -44,9 +44,9 @@ export function SubscriptionCard({ subscription, onEdit, onDelete, onToggle }: S
             >
               {subscription.name.charAt(0)}
             </div>
-            <div>
-              <p className="text-[#EEEEEE] font-semibold text-sm leading-none mb-1">{subscription.name}</p>
-              <div className="flex items-center gap-3 text-xs text-[#EEEEEE]/40">
+            <div className="min-w-0">
+              <p className="text-[#EEEEEE] font-semibold text-sm leading-none mb-1 truncate">{subscription.name}</p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#EEEEEE]/40">
                 <span style={{ color }}>{formatCurrency(subscription.totalAmount)}/mo</span>
                 <span className="flex items-center gap-1"><Users size={10} /> {subscription.participants.length}</span>
                 <span className="capitalize">{subscription.billingCycle}</span>
@@ -57,15 +57,15 @@ export function SubscriptionCard({ subscription, onEdit, onDelete, onToggle }: S
           <div className="flex items-center gap-2 shrink-0 justify-between sm:justify-end">
             <div className="text-left sm:text-right mr-auto sm:mr-1">
               <p style={{ fontFamily: "'Syne', sans-serif" }} className="text-[#EEEEEE] font-extrabold text-base leading-none">{formatCurrency(perPerson)}</p>
-              <p className="text-[#EEEEEE]/30 text-[10px] mt-0.5">per person</p>
+              <p className="text-[#EEEEEE]/30 text-xs mt-0.5">per person</p>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => setExpanded(!expanded)}>
+            <Button size="sm" variant="ghost" className="min-w-11 min-h-11 justify-center" aria-label={expanded ? 'Collapse payments' : 'Expand payments'} onClick={() => setExpanded(!expanded)}>
               {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </Button>
-            <Button size="sm" variant="secondary" onClick={() => onEdit(subscription)}>
+            <Button size="sm" variant="secondary" className="min-w-11 min-h-11 justify-center" aria-label="Edit subscription" onClick={() => onEdit(subscription)}>
               <Pencil size={13} />
             </Button>
-            <Button size="sm" variant="danger" onClick={() => onDelete(subscription.id)}>
+            <Button size="sm" variant="danger" className="min-w-11 min-h-11 justify-center" aria-label="Delete subscription" onClick={() => onDelete(subscription.id)}>
               <Trash2 size={13} />
             </Button>
           </div>

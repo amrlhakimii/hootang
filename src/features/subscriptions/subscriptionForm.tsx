@@ -59,7 +59,7 @@ export function SubscriptionForm({ initial, onSubmit, onCancel }: SubscriptionFo
               key={p}
               type="button"
               onClick={() => setName(p)}
-              className={`px-2 py-0.5 rounded-lg text-xs cursor-pointer transition-colors ${
+              className={`px-3 py-2.5 min-h-11 rounded-lg text-xs cursor-pointer transition-colors ${
                 name === p ? 'bg-[#00ADB5] text-[#222831]' : 'bg-[#222831] text-[#EEEEEE]/50 hover:text-[#EEEEEE]'
               }`}
             >
@@ -109,7 +109,7 @@ export function SubscriptionForm({ initial, onSubmit, onCancel }: SubscriptionFo
             {participants.map((p) => (
               <span key={p} className="flex items-center gap-1 bg-[#00ADB5]/20 text-[#00ADB5] text-xs px-2 py-1 rounded-full">
                 {p}
-                <button type="button" onClick={() => removeParticipant(p)} className="cursor-pointer">
+                <button type="button" aria-label={`Remove ${p}`} onClick={() => removeParticipant(p)} className="relative cursor-pointer before:absolute before:-inset-3 before:content-['']">
                   <X size={10} />
                 </button>
               </span>
@@ -124,8 +124,8 @@ export function SubscriptionForm({ initial, onSubmit, onCancel }: SubscriptionFo
       </div>
 
       <div className="flex gap-2 pt-2">
-        <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>
-        <Button type="submit" className="flex-1">{initial ? 'Save Changes' : 'Add Subscription'}</Button>
+        <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 min-h-11 justify-center">Cancel</Button>
+        <Button type="submit" className="flex-1 min-h-11 justify-center">{initial ? 'Save Changes' : 'Add Subscription'}</Button>
       </div>
     </form>
   )

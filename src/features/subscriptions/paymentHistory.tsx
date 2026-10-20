@@ -46,7 +46,7 @@ export function PaymentHistory({ subscription, onToggle }: PaymentHistoryProps) 
           <tr>
             <th className="text-left text-[#EEEEEE]/40 pb-2 pr-4 font-normal">Person</th>
             {months.map((m) => (
-              <th key={m} className={`text-center pb-2 px-1 font-normal ${m === currentMonth ? 'text-[#00ADB5]' : 'text-[#EEEEEE]/40'}`}>
+              <th key={m} className={`text-center pb-2 px-2 font-normal ${m === currentMonth ? 'text-[#00ADB5]' : 'text-[#EEEEEE]/40'}`}>
                 {formatMonth(m)}
               </th>
             ))}
@@ -55,14 +55,14 @@ export function PaymentHistory({ subscription, onToggle }: PaymentHistoryProps) 
         <tbody>
           {subscription.participants.map((p) => (
             <tr key={p.name}>
-              <td className="text-[#EEEEEE]/70 pr-4 py-1.5 whitespace-nowrap">{p.name}</td>
+              <td className="text-[#EEEEEE]/70 pr-4 py-2.5 whitespace-nowrap">{p.name}</td>
               {months.map((month) => {
                 const paid = isPaid(p.name, month)
                 return (
-                  <td key={month} className="text-center px-1">
+                  <td key={month} className="text-center px-2">
                     <button
                       onClick={() => handleToggle(p.name, month)}
-                      className={`w-6 h-6 rounded-full text-[10px] font-medium transition-all cursor-pointer ${
+                      className={`relative w-6 h-6 rounded-full text-xs font-medium transition-all cursor-pointer before:absolute before:-inset-x-1 before:-inset-y-1.5 before:content-[''] ${
                         paid
                           ? 'bg-[#00ADB5] text-[#222831]'
                           : 'bg-[#222831] text-[#EEEEEE]/30 hover:bg-[#393E46]'

@@ -8,6 +8,7 @@ import { Modal } from '../../components/layout/modal'
 import { EmptyState } from '../../components/layout/emptyState'
 import { SubscriptionCard } from './subscriptionCard'
 import { SubscriptionForm } from './subscriptionForm'
+import { useUndoDelete } from '../../hooks/useUndoDelete'
 import { useSubscriptions } from '../../hooks/useSubscription'
 import { type Subscription } from '../../types/subscription'
 import { formatCurrency } from '../../utils/formatCurrency'
@@ -25,7 +26,8 @@ function StatCard({ label, value, color, icon }: { label: string; value: string;
 }
 
 export function SubscriptionPage() {
-  const { subscriptions, addSubscription, updateSubscription, deleteSubscription, togglePayment } = useSubscriptions()
+  const { subscriptions, addSubscription, updateSubscription, deleteSubscription, restoreSubscription, togglePayment } = useSubscriptions()
+  const undoDelete = useUndoDelete()
   const [showModal, setShowModal] = useState(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
   const statsRef = useRef<HTMLDivElement>(null)
@@ -56,7 +58,7 @@ export function SubscriptionPage() {
 
   return (
     <PageContainer>
-      <Navbar title="Subscriptions" action={<Button onClick={() => { setEditingSubscription(null); setShowModal(true) }}><Plus size={15} /> Add Subscription</Button>} />
+      <Navbar title="Subscriptions" action={<Button className="min-h-11" onClick={() => { setEditingSubscription(null); setShowModal(true) }}><Plus size={15} /> Add Subscription</Button>} />
       <p className="text-[#EEEEEE]/30 text-sm -mt-4 mb-6">Split your streaming costs with the crew.</p>
 
       <div ref={statsRef} className="grid grid-cols-2 gap-3 mb-6">
@@ -73,7 +75,11 @@ export function SubscriptionPage() {
               key={sub.id}
               subscription={sub}
               onEdit={(s) => { setEditingSubscription(s); setShowModal(true) }}
-              onDelete={deleteSubscription}
+              onDelete={(id) => {
+                const item = subscriptions.find((s) => s.id === id)
+                if (!item) return
+                undoDelete('Subscription', () => deleteSubscription(id), () => restoreSubscription(item), id)
+              }}
               onToggle={togglePayment}
             />
           ))}

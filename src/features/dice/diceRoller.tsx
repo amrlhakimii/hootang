@@ -73,7 +73,7 @@ export function DiceRoller({ names }: DiceRollerProps) {
         <p className="text-[#EEEEEE]/25 text-sm text-center">Add names on the right to get started</p>
       )}
 
-      <Button onClick={roll} disabled={rolling || names.length === 0} size="lg" className="w-full max-w-48">
+      <Button onClick={roll} disabled={rolling || names.length === 0} size="lg" className="w-full max-w-48 justify-center">
         {rolling ? '🎲 Rolling...' : '🎲 Roll!'}
       </Button>
     </div>
