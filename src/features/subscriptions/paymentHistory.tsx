@@ -20,7 +20,9 @@ function getLast6Months(): string[] {
 }
 
 export function PaymentHistory({ subscription, onToggle }: PaymentHistoryProps) {
-  const months = getLast6Months()
+  const startMonth = subscription.startDate.slice(0, 7)
+  const recent = getLast6Months().filter((m) => m >= startMonth)
+  const months = recent.length > 0 ? recent : [startMonth]
   const perPerson = getCostPerPerson(subscription)
   const currentMonth = getCurrentMonth()
 
