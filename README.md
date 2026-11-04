@@ -1,74 +1,62 @@
-# React + TypeScript + Vite
+# Hootang
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Hootang is a personal money-tracking web app (React single-page app with Firebase backend) for tracking loans owed between friends, recurring bills and subscriptions, spending, and splitting receipts. Amounts are in Malaysian context (DuitNow payment details, due-date reminders scheduled on Malaysia time).
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Verified from the routes and feature folders in `src/`:
 
-## React Compiler
+- Dashboard, transaction history, and spending tracking with budgets
+- Loans, bills, and subscriptions (including payment history)
+- Friends list
+- Receipt splitting: items, tax/service charge/discount, percentage split, per-person assignment, DuitNow settings, PDF receipt generation, and sharing via WhatsApp
+- Optional receipt scanning from a photo, using an OpenRouter model (`src/utils/scanReceipt.ts`)
+- Dice roller and random picker
+- Authentication via Firebase Auth
+- Push notifications for items due in 3 days: a Firebase scheduled function (`functions/`) and an alternative Cloudflare Worker on a daily cron (`cloudflare-worker/`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech stack
 
-## Expanding the ESLint configuration
+- React 19, TypeScript, Vite, Tailwind CSS 4, React Router 7
+- Firebase (Auth, Firestore, Cloud Messaging, Cloud Functions)
+- Cloudflare Workers (scheduled notifications)
+- jsPDF, qrcode, jsQR, canvas-confetti, GSAP, anime.js, lucide-react
+- Deployed with Netlify (`netlify.toml`) and Firebase configs
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Running locally
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+yarn install        # or npm install
+cp .env.example .env
+yarn dev
+yarn build          # tsc -b && vite build
+yarn lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Environment variables (names only; see `.env.example`):
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_VAPID_KEY`
+- `VITE_OPENROUTER_API_KEY` (only needed for receipt scanning; note that `VITE_` variables are embedded in the client bundle)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The Cloudflare Worker expects `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY` as Worker secrets.
+
+## Project structure
+
 ```
-# hootang
+src/
+  features/   auth, bills, dashboard, dice, friends, history, loans, receipt, spending, subscriptions
+  components/ layout/ (generic UI) and ui/ (navigation, branding)
+  context/    Auth and Toast providers
+  routes/     route definitions
+  utils/      split calculation, DuitNow, PDF generation, receipt scanning
+  types/      shared TypeScript types
+functions/          Firebase scheduled function (due-date notifications)
+cloudflare-worker/  Cloudflare Worker with daily cron (due-date notifications)
+firestore.rules     Firestore security rules
+```
